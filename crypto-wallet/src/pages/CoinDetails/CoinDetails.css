@@ -91,10 +91,13 @@
 }
 
 .chart-section {
-    background-color: var(--bg-card);
-    padding: 2rem;
-    border-radius: 20px;
-    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    background-color: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    backdrop-filter: var(--glass-blur);
+    -webkit-backdrop-filter: var(--glass-blur);
+    padding: 2.5rem;
+    border-radius: 24px;
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
 }
 
 .chart-container {
@@ -104,9 +107,12 @@
 .time-filters {
     display: flex;
     gap: 0.5rem;
-    background-color: var(--bg-card);
+    background-color: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    backdrop-filter: var(--glass-blur);
+    -webkit-backdrop-filter: var(--glass-blur);
     padding: 0.5rem;
-    border-radius: 12px;
+    border-radius: 14px;
     width: fit-content;
 }
 
@@ -136,12 +142,21 @@
 }
 
 .stat-card {
-    background-color: var(--bg-card);
+    background-color: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    backdrop-filter: var(--glass-blur);
+    -webkit-backdrop-filter: var(--glass-blur);
     padding: 1.5rem;
-    border-radius: 16px;
+    border-radius: 20px;
     display: flex;
     flex-direction: column;
     gap: 0.5rem;
+    transition: all 0.2s;
+}
+
+.stat-card:hover {
+    background-color: rgba(255, 255, 255, 0.06);
+    transform: translateY(-2px);
 }
 
 .stat-card .label {
@@ -155,9 +170,12 @@
 }
 
 .description-section {
-    background-color: var(--bg-card);
-    padding: 2rem;
-    border-radius: 20px;
+    background-color: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    backdrop-filter: var(--glass-blur);
+    -webkit-backdrop-filter: var(--glass-blur);
+    padding: 2.5rem;
+    border-radius: 24px;
 }
 
 .description-section h3 {

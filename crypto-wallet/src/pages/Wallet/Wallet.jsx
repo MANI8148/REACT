@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowUpRight, ArrowDownLeft, Wallet as WalletIcon, RefreshCw } from 'lucide-react';
+import { ArrowUpRight, ArrowDownLeft, Wallet as WalletIcon, RefreshCw, Smartphone, ShieldCheck, Lock } from 'lucide-react';
 import { getCoinsMarkets } from '../../services/cryptoApi';
 import BuySellModal from '../../components/wallet/BuySellModal';
+import SecurityModal from '../../components/wallet/SecurityModal';
 import Carousel from '../../components/ui/Carousel/Carousel';
 import './Wallet.css';
 
@@ -10,12 +11,20 @@ import './Wallet.css';
 
 const Wallet = () => {
     const navigate = useNavigate();
+    const FALLBACK_IMAGE = 'https://cryptologos.cc/logos/bitcoin-btc-logo.png';
+
     const [assets, setAssets] = useState([
-        { id: 'bitcoin', name: 'Bitcoin', symbol: 'BTC', amount: 0.45, value: 0, change: 0, image: '' },
-        { id: 'ethereum', name: 'Ethereum', symbol: 'ETH', amount: 3.2, value: 0, change: 0, image: '' },
-        { id: 'solana', name: 'Solana', symbol: 'SOL', amount: 145, value: 0, change: 0, image: '' },
-        { id: 'cardano', name: 'Cardano', symbol: 'ADA', amount: 5000, value: 0, change: 0, image: '' },
+        { id: 'bitcoin', name: 'Bitcoin', symbol: 'BTC', amount: 0.45, value: 0, change: 0, image: 'https://assets.coingecko.com/coins/images/1/large/bitcoin.png' },
+        { id: 'ethereum', name: 'Ethereum', symbol: 'ETH', amount: 3.2, value: 0, change: 0, image: 'https://assets.coingecko.com/coins/images/279/large/ethereum.png' },
+        { id: 'solana', name: 'Solana', symbol: 'SOL', amount: 145, value: 0, change: 0, image: 'https://assets.coingecko.com/coins/images/4128/large/solana.png' },
+        { id: 'cardano', name: 'Cardano', symbol: 'ADA', amount: 5000, value: 0, change: 0, image: 'https://assets.coingecko.com/coins/images/975/large/cardano.png' },
     ]);
+    const [offlineAssets, setOfflineAssets] = useState([
+        { id: 'bitcoin', name: 'Cold BTC', symbol: 'BTC', amount: 1.2, value: 0, change: 0, image: 'https://assets.coingecko.com/coins/images/1/large/bitcoin.png' },
+        { id: 'ethereum', name: 'Cold ETH', symbol: 'ETH', amount: 10, value: 0, change: 0, image: 'https://assets.coingecko.com/coins/images/279/large/ethereum.png' },
+    ]);
+    const [isOffline, setIsOffline] = useState(false);
+    const [showSecurityModal, setShowSecurityModal] = useState(false);
     const [loading, setLoading] = useState(true);
     const [modalConfig, setModalConfig] = useState({ isOpen: false, type: 'buy', asset: null });
 
@@ -39,6 +48,21 @@ const Wallet = () => {
                     return asset;
                 }));
 
+                // Also update offline assets prices if available
+                setOfflineAssets(prev => prev.map(asset => {
+                    const marketCoin = marketData.find(c => c.id === asset.id);
+                    if (marketCoin) {
+                        return {
+                            ...asset,
+                            value: marketCoin.current_price * asset.amount,
+                            price: marketCoin.current_price,
+                            change: marketCoin.price_change_percentage_24h,
+                            image: marketCoin.image || asset.image
+                        };
+                    }
+                    return asset;
+                }));
+
             } catch (error) {
                 console.error("Error updating wallet prices:", error);
             } finally {
@@ -49,7 +73,23 @@ const Wallet = () => {
         fetchPrices();
     }, []);
 
-    const totalBalance = assets.reduce((acc, asset) => acc + (asset.value || 0), 0);
+    const currentAssets = isOffline ? offlineAssets : assets;
+    const totalBalance = currentAssets.reduce((acc, asset) => acc + (asset.value || 0), 0);
+
+    const toggleMode = () => {
+        if (!isOffline) {
+            // Trying to enter offline mode (cold wallet)
+            setShowSecurityModal(true);
+        } else {
+            // Going back to online
+            setIsOffline(false);
+        }
+    };
+
+    const handleUnlock = () => {
+        setIsOffline(true);
+        setShowSecurityModal(false);
+    };
 
     const openModal = (type, assetId = 'bitcoin') => {
         const asset = assets.find(a => a.id === assetId) || assets[0];
@@ -74,9 +114,21 @@ const Wallet = () => {
     return (
         <div className="wallet-page">
             <header className="page-header">
-                <h1>My Wallet</h1>
-                <div className="user-profile">
-                    <span className="user-initials">MP</span>
+                <div className="header-title">
+                    <h1>My Wallet</h1>
+                    <div className={`wallet-status-badge ${isOffline ? 'offline' : 'online'}`}>
+                        {isOffline ? <ShieldCheck size={14} /> : <Smartphone size={14} />}
+                        <span>{isOffline ? 'Cold Storage' : 'Hot Wallet'}</span>
+                    </div>
+                </div>
+                <div className="header-right">
+                    <button className={`mode-toggle-btn ${isOffline ? 'to-online' : 'to-offline'}`} onClick={toggleMode}>
+                        {isOffline ? <Smartphone size={18} /> : <Lock size={18} />}
+                        <span>{isOffline ? 'Online Mode' : 'Cold Storage'}</span>
+                    </button>
+                    <div className="user-profile">
+                        <span className="user-initials">MP</span>
+                    </div>
                 </div>
             </header>
 
@@ -117,26 +169,27 @@ const Wallet = () => {
 
                 <div className="assets-carousel-wrapper">
                     <Carousel
-                        items={assets.filter(a => a.amount > 0).map(asset => ({
+                        items={currentAssets.filter(a => a.amount > 0).map(asset => ({
                             id: asset.id,
                             title: asset.name,
                             description: `Available: ${asset.amount} ${asset.symbol}`,
-                            icon: <img src={asset.image} alt={asset.name} className="carousel-crypto-icon" style={{ width: '100%', height: '100%', borderRadius: '50%' }} />
+                            icon: <img src={asset.image || FALLBACK_IMAGE} alt={asset.name} className="carousel-crypto-icon" style={{ width: '100%', height: '100%', borderRadius: '50%' }} />
                         }))}
                         baseWidth={350}
-                        autoplay={true}
+                        autoplay={!isOffline}
                         loop={true}
+                        round={false}
                         onItemClick={(item) => navigate(`/coin/${item.id}`)}
                     />
                 </div>
 
                 <div className="assets-stagnant-list">
-                    {assets
+                    {currentAssets
                         .sort((a, b) => b.value - a.value)
                         .map((asset) => (
                             <div key={asset.id} className="asset-row-card" onClick={() => navigate(`/coin/${asset.id}`)}>
                                 <div className="asset-row-left">
-                                    <img src={asset.image} alt={asset.name} className="asset-row-img" />
+                                    <img src={asset.image || FALLBACK_IMAGE} alt={asset.name} className="asset-row-img" />
                                     <div className="asset-row-info">
                                         <span className="asset-row-name">{asset.name}</span>
                                         <span className="asset-row-symbol">{asset.symbol}</span>
@@ -163,6 +216,14 @@ const Wallet = () => {
                 asset={modalConfig.asset}
                 currentPrice={modalConfig.asset?.price || 0}
                 onConfirm={handleTransaction}
+            />
+
+            <SecurityModal
+                isOpen={showSecurityModal}
+                onClose={() => setShowSecurityModal(false)}
+                onVerify={handleUnlock}
+                title="Cold Storage Access"
+                description="Please enter your 4-digit PIN to access your offline cold wallet."
             />
         </div>
     );

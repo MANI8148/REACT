@@ -1,11 +1,12 @@
 .carousel-container {
     position: relative;
     overflow: hidden;
-    border: 1px solid #555;
+    border: 1px solid rgba(255, 255, 255, 0.1);
     border-radius: 24px;
     padding: 16px;
     --outer-r: 24px;
     --p-distance: 12px;
+    background: rgba(13, 7, 22, 0.2);
 }
 
 .carousel-track {
@@ -19,11 +20,12 @@
     flex-direction: column;
     align-items: flex-start;
     justify-content: space-between;
-    border: 1px solid #555;
+    border: 1px solid rgba(255, 255, 255, 0.1);
     border-radius: calc(var(--outer-r) - var(--p-distance));
     background-color: #0d0716;
     overflow: hidden;
     cursor: grab;
+    padding: 1rem;
 }
 
 .carousel-item:active {
@@ -31,17 +33,18 @@
 }
 
 .carousel-container.round {
-    border: 1px solid #555;
+    border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .carousel-item.round {
     background-color: #0d0716;
     position: relative;
     bottom: 0.1em;
-    border: 1px solid #555;
+    border: 1px solid rgba(255, 255, 255, 0.1);
     justify-content: center;
     align-items: center;
     text-align: center;
+    padding: 0;
 }
 
 .carousel-item-header.round {
@@ -58,50 +61,52 @@
 }
 
 .carousel-indicator.active {
-    background-color: #333333;
+    background-color: #ffffff;
 }
 
 .carousel-indicator.inactive {
-    background-color: rgba(51, 51, 51, 0.4);
+    background-color: rgba(255, 255, 255, 0.2);
 }
 
 .carousel-item-header {
-    margin-bottom: 16px;
-    padding: 20px;
-    padding-top: 20px;
+    margin-bottom: 12px;
 }
 
 .carousel-icon-container {
     display: flex;
-    height: 28px;
-    width: 28px;
+    height: 48px;
+    width: 48px;
     align-items: center;
     justify-content: center;
     border-radius: 50%;
-    background-color: #fff;
+    background-color: rgba(255, 255, 255, 0.05);
 }
 
 .carousel-icon {
-    height: 16px;
-    width: 16px;
-    color: #060010;
+    height: 24px;
+    width: 24px;
+    color: #fff;
+}
+
+.carousel-crypto-icon {
+    width: 32px;
+    height: 32px;
 }
 
 .carousel-item-content {
-    padding: 20px;
-    padding-bottom: 20px;
+    width: 100%;
 }
 
 .carousel-item-title {
     margin-bottom: 4px;
-    font-weight: 900;
-    font-size: 18px;
+    font-weight: 700;
+    font-size: 16px;
     color: #fff;
 }
 
 .carousel-item-description {
-    font-size: 14px;
-    color: #fff;
+    font-size: 13px;
+    color: rgba(255, 255, 255, 0.6);
 }
 
 .carousel-indicators-container {
@@ -119,17 +124,19 @@
 }
 
 .carousel-indicator {
-    height: 8px;
-    width: 8px;
+    height: 6px;
+    width: 6px;
     border-radius: 50%;
     cursor: pointer;
-    transition: background-color 150ms;
+    transition: all 150ms;
 }
 
-.carousel-indicator.active {
-    background-color: #fff;
+.carousel-item.round .carousel-item-content {
+    display: none;
 }
 
-.carousel-indicator.inactive {
-    background-color: #555;
+.carousel-item.round .carousel-icon-container {
+    width: 60%;
+    height: 60%;
+    background: none;
 }

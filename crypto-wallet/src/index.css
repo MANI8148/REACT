@@ -1,15 +1,17 @@
 :root {
-  --bg-dark: #121212;
-  --bg-card: #1E1E2E;
+  --bg-dark: #0b0614;
+  --bg-card: rgba(26, 26, 46, 0.4);
+  --glass-bg: rgba(255, 255, 255, 0.03);
+  --glass-border: rgba(255, 255, 255, 0.1);
+  --glass-blur: blur(12px);
   --text-primary: #FFFFFF;
   --text-secondary: #A1A1AA;
   --primary: #8B5CF6;
-  /* Violet */
   --primary-rgb: 139, 92, 246;
   --primary-hover: #7C3AED;
   --success: #10B981;
   --danger: #EF4444;
-  --border: #2D2D3F;
+  --border: rgba(255, 255, 255, 0.1);
 
   --font-family: 'Inter', system-ui, -apple-system, sans-serif;
 }
@@ -26,6 +28,7 @@ body {
   color: var(--text-primary);
   min-height: 100vh;
   line-height: 1.5;
+  overflow: hidden;
 }
 
 a {

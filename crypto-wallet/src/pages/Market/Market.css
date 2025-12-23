@@ -15,15 +15,17 @@
 }
 
 .search-bar {
-    background-color: var(--bg-card);
+    background-color: var(--glass-bg);
     display: flex;
     align-items: center;
     gap: 0.75rem;
-    padding: 0.75rem 1rem;
-    border-radius: 12px;
-    width: 300px;
-    border: 1px solid transparent;
-    transition: border-color 0.2s;
+    padding: 0.75rem 1.25rem;
+    border-radius: 16px;
+    width: 350px;
+    border: 1px solid var(--glass-border);
+    backdrop-filter: var(--glass-blur);
+    -webkit-backdrop-filter: var(--glass-blur);
+    transition: all 0.2s;
 }
 
 .search-bar:focus-within {
@@ -130,22 +132,26 @@
 }
 
 .coin-card-row {
-    background: #1e293b;
-    border: 1px solid #334155;
-    border-radius: 12px;
-    padding: 1.5rem;
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    backdrop-filter: var(--glass-blur);
+    -webkit-backdrop-filter: var(--glass-blur);
+    border-radius: 20px;
+    padding: 1.5rem 2rem;
     display: flex;
     align-items: center;
     justify-content: space-between;
     width: 100%;
     cursor: pointer;
-    transition: background 0.2s;
-    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
 }
 
 .coin-card-row:hover {
-    background: #283750;
-    border-color: #3b82f6;
+    background: rgba(255, 255, 255, 0.08);
+    border-color: rgba(255, 255, 255, 0.2);
+    transform: translateY(-2px);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
 }
 
 .coin-rank {

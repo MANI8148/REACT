@@ -1,6 +1,8 @@
 import { useEffect, useRef, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { gsap } from 'gsap';
+import { useAuth } from '../../context/AuthContext';
+import { LogOut } from 'lucide-react';
 import './PillNav.css';
 
 const PillNav = ({
@@ -28,6 +30,8 @@ const PillNav = ({
     const mobileMenuRef = useRef(null);
     const navItemsRef = useRef(null);
     const logoRef = useRef(null);
+    const { logout } = useAuth();
+    const navigate = useNavigate();
 
     useEffect(() => {
         const layout = () => {
@@ -305,6 +309,30 @@ const PillNav = ({
                                 )}
                             </li>
                         ))}
+                        <li role="none">
+                            <button
+                                className="pill logout-pill"
+                                onClick={logout}
+                                onMouseEnter={() => handleEnter(items.length)}
+                                onMouseLeave={() => handleLeave(items.length)}
+                                style={{ background: 'rgba(239, 68, 68, 0.1)', color: '#ef4444' }}
+                            >
+                                <span
+                                    className="hover-circle"
+                                    aria-hidden="true"
+                                    ref={el => {
+                                        circleRefs.current[items.length] = el;
+                                    }}
+                                    style={{ background: '#ef4444' }}
+                                />
+                                <span className="label-stack">
+                                    <span className="pill-label"><LogOut size={16} style={{ marginRight: '8px' }} />Logout</span>
+                                    <span className="pill-label-hover" aria-hidden="true" style={{ color: '#fff' }}>
+                                        <LogOut size={16} style={{ marginRight: '8px' }} />Logout
+                                    </span>
+                                </span>
+                            </button>
+                        </li>
                     </ul>
                 </div>
 

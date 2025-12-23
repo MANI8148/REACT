@@ -54,7 +54,7 @@ const CoinDetails = () => {
 
             <header className="coin-header">
                 <div className="coin-identity">
-                    <img src={coin.image.large} alt={coin.name} />
+                    <img src={coin.image?.large || 'https://cryptologos.cc/logos/bitcoin-btc-logo.png'} alt={coin.name} />
                     <div>
                         <h1>{coin.name} <span className="symbol">({coin.symbol.toUpperCase()})</span></h1>
                         <span className="rank">Rank #{coin.market_cap_rank}</span>

@@ -22,6 +22,8 @@ const useDebounce = (value, delay) => {
   return debouncedValue;
 };
 
+const FALLBACK_IMAGE = 'https://cryptologos.cc/logos/bitcoin-btc-logo.png';
+
 const Market = () => {
   const [coins, setCoins] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -58,7 +60,7 @@ const Market = () => {
         id: coin.id,
         name: coin.name,
         symbol: coin.symbol,
-        image: coin.large,
+        image: coin.large || coin.thumb || FALLBACK_IMAGE,
         current_price: 0, // Search API doesn't return price
         price_change_percentage_24h: 0, // Search API doesn't return change
         market_cap: coin.market_cap_rank || 0, // Use rank as proxy or 0
@@ -110,7 +112,7 @@ const Market = () => {
                   <div className="coin-card-row">
                     <div className="coin-rank">#{coin.market_cap_rank || index + 1}</div>
                     <div className="coin-main">
-                      <img src={coin.image} alt={coin.name} className="coin-img" />
+                      <img src={coin.image || FALLBACK_IMAGE} alt={coin.name} className="coin-img" />
                       <div>
                         <h3>{coin.name}</h3>
                         <span className="symbol">{coin.symbol.toUpperCase()}</span>

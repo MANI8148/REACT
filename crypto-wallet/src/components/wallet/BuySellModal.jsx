@@ -1,15 +1,22 @@
 import React, { useState, useEffect } from 'react';
-import { X, ArrowRight, Wallet } from 'lucide-react';
+import { X, ArrowRight, Wallet, ShieldCheck, Lock } from 'lucide-react';
+import TransactionSimulator from './TransactionSimulator';
 import './BuySellModal.css';
 
 const BuySellModal = ({ isOpen, onClose, type, asset, onConfirm, currentPrice }) => {
     const [amount, setAmount] = useState('');
     const [estimatedValue, setEstimatedValue] = useState(0);
+    const [showSimulation, setShowSimulation] = useState(false);
+    const [password, setPassword] = useState('');
+    const [error, setError] = useState('');
 
     useEffect(() => {
         if (isOpen) {
             setAmount('');
             setEstimatedValue(0);
+            setShowSimulation(false);
+            setPassword('');
+            setError('');
         }
     }, [isOpen]);
 
@@ -98,14 +105,88 @@ const BuySellModal = ({ isOpen, onClose, type, asset, onConfirm, currentPrice })
                     <span className="value">${estimatedValue.toLocaleString()}</span>
                 </div>
 
-                <button
-                    className={`confirm-btn ${type}`}
-                    onClick={() => onConfirm(parseFloat(amount), type)}
-                    disabled={!amount || parseFloat(amount) <= 0}
-                >
-                    {type === 'buy' ? 'Buy Now' : 'Sell Now'} <ArrowRight size={16} />
-                </button>
+                {!showSimulation ? (
+                    <button
+                        className={`confirm-btn ${type}`}
+                        onClick={() => setShowSimulation(true)}
+                        disabled={!amount || parseFloat(amount) <= 0}
+                    >
+                        {type === 'buy' ? 'Review Purchase' : 'Review Sale'} <ArrowRight size={16} />
+                    </button>
+                ) : (
+                    <div className="security-layer">
+                        <TransactionSimulator
+                            tx={{
+                                type,
+                                amount: parseFloat(amount),
+                                symbol: asset?.symbol,
+                                costUsd: estimatedValue.toFixed(2),
+                                targetAddress: '0x3c...8f2a', // Mock
+                                gasPrice: 25 // Mock
+                            }}
+                            onApprove={() => {
+                                if (password === '1234') { // Using PIN for demo
+                                    onConfirm(parseFloat(amount), type);
+                                    onClose();
+                                } else {
+                                    setError('Invalid PIN for signing');
+                                }
+                            }}
+                            onCancel={() => setShowSimulation(false)}
+                        />
+
+                        <div className="signing-field">
+                            <label><Lock size={14} /> Confirm PIN to Sign</label>
+                            <input
+                                type="password"
+                                placeholder="Enter 4-digit PIN"
+                                value={password}
+                                onChange={(e) => setPassword(e.target.value)}
+                                className={error ? 'error' : ''}
+                            />
+                            {error && <p className="error-text">{error}</p>}
+                        </div>
+                    </div>
+                )}
             </div>
+            <style jsx>{`
+                .security-layer {
+                    margin-top: 1rem;
+                }
+                .signing-field {
+                    margin-top: 1rem;
+                    background: rgba(255, 255, 255, 0.05);
+                    padding: 1rem;
+                    border-radius: 12px;
+                }
+                .signing-field label {
+                    display: flex;
+                    align-items: center;
+                    gap: 6px;
+                    font-size: 0.85rem;
+                    color: var(--text-secondary);
+                    margin-bottom: 8px;
+                }
+                .signing-field input {
+                    width: 100%;
+                    padding: 10px;
+                    background: rgba(0, 0, 0, 0.2);
+                    border: 1px solid rgba(255, 255, 255, 0.1);
+                    border-radius: 8px;
+                    color: white;
+                    text-align: center;
+                    letter-spacing: 4px;
+                }
+                .signing-field input.error {
+                    border-color: #ef4444;
+                }
+                .error-text {
+                    color: #ef4444;
+                    font-size: 0.8rem;
+                    margin-top: 4px;
+                    text-align: center;
+                }
+            `}</style>
         </div>
     );
 };
