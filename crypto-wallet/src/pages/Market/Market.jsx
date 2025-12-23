@@ -1,34 +1,88 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { Search } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import { getCoinsMarkets } from '../../services/cryptoApi';
+import { getCoinsMarkets, searchCoins } from '../../services/cryptoApi';
+import Loading from '../../components/loading/Loading';
+import AnimatedList from '../../components/ui/AnimatedList/AnimatedList';
 import './Market.css';
+
+
+
+// Debounce helper
+const useDebounce = (value, delay) => {
+  const [debouncedValue, setDebouncedValue] = useState(value);
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedValue(value);
+    }, delay);
+    return () => {
+      clearTimeout(handler);
+    };
+  }, [value, delay]);
+  return debouncedValue;
+};
 
 const Market = () => {
   const [coins, setCoins] = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
+  const debouncedSearch = useDebounce(search, 500);
   const navigate = useNavigate();
 
+  const fetchCoins = async () => {
+    setLoading(true);
+    try {
+      const data = await getCoinsMarkets();
+      setCoins(data);
+    } catch (error) {
+      console.error("Error fetching market data:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleSearch = async (query) => {
+    if (!query) {
+      fetchCoins();
+      return;
+    }
+    setLoading(true);
+    try {
+      const results = await searchCoins(query);
+      // Transform search results to match market data structure roughly or handle separately
+      // The search API returns a different structure.
+      // For consistency, we might want to just show the search results differently 
+      // OR try to fetch market data for the found IDs.
+      // Here, we'll map the search results to a displayable format for the table.
+      const formattedResults = results.map(coin => ({
+        id: coin.id,
+        name: coin.name,
+        symbol: coin.symbol,
+        image: coin.large,
+        current_price: 0, // Search API doesn't return price
+        price_change_percentage_24h: 0, // Search API doesn't return change
+        market_cap: coin.market_cap_rank || 0, // Use rank as proxy or 0
+        is_search_result: true
+      }));
+      setCoins(formattedResults);
+
+    } catch (error) {
+      console.error("Error searching coins:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
-    const fetchCoins = async () => {
-      try {
-        const data = await getCoinsMarkets();
-        setCoins(data);
-      } catch (error) {
-        console.error("Error fetching market data:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
+    if (debouncedSearch) {
+      handleSearch(debouncedSearch);
+    } else {
+      fetchCoins();
+    }
+  }, [debouncedSearch]);
 
-    fetchCoins();
-  }, []);
 
-  const filteredCoins = coins.filter(coin =>
-    coin.name.toLowerCase().includes(search.toLowerCase()) ||
-    coin.symbol.toLowerCase().includes(search.toLowerCase())
-  );
+  if (loading && !coins.length) return <Loading />;
 
   return (
     <div className="market-page">
@@ -38,49 +92,49 @@ const Market = () => {
           <Search size={20} />
           <input
             type="text"
-            placeholder="Search coins..."
+            placeholder="Search coins (e.g. Bitcoin)..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
           />
         </div>
       </header>
 
-      <div className="market-table-container">
+      <div className="market-stack-container" style={{ height: '80vh', overflow: 'hidden' }}>
         {loading ? (
-          <div className="loading-state">Loading market data...</div>
+          <div className="table-loading"><Loading /></div>
         ) : (
-          <table className="market-table">
-            <thead>
-              <tr>
-                <th>Name</th>
-                <th>Price</th>
-                <th>24h Change</th>
-                <th className="hide-mobile">Market Cap</th>
-              </tr>
-            </thead>
-            <tbody>
-              {filteredCoins.map(coin => (
-                <tr key={coin.id} onClick={() => navigate(`/coin/${coin.id}`)}>
-                  <td className="coin-name-cell">
-                    <img src={coin.image} alt={coin.name} />
-                    <div className="name-info">
-                      <span className="font-bold">{coin.name}</span>
-                      <span className="text-muted">{coin.symbol.toUpperCase()}</span>
+          <div style={{ height: '100%' }}>
+            <AnimatedList
+              items={coins.map((coin, index) => ({
+                content: (
+                  <div className="coin-card-row">
+                    <div className="coin-rank">#{coin.market_cap_rank || index + 1}</div>
+                    <div className="coin-main">
+                      <img src={coin.image} alt={coin.name} className="coin-img" />
+                      <div>
+                        <h3>{coin.name}</h3>
+                        <span className="symbol">{coin.symbol.toUpperCase()}</span>
+                      </div>
                     </div>
-                  </td>
-                  <td>${coin.current_price.toLocaleString()}</td>
-                  <td>
-                    <span className={`change-text ${coin.price_change_percentage_24h >= 0 ? 'positive' : 'negative'}`}>
+                    <div className="coin-price">
+                      ${coin.current_price?.toLocaleString()}
+                    </div>
+                    <div className={`coin-change ${coin.price_change_percentage_24h >= 0 ? 'positive' : 'negative'}`}>
                       {coin.price_change_percentage_24h?.toFixed(2)}%
-                    </span>
-                  </td>
-                  <td className="hide-mobile">${coin.market_cap.toLocaleString()}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+                    </div>
+                  </div>
+                ),
+                id: coin.id
+              }))}
+              onItemSelect={(item) => navigate(`/coin/${item.id}`)}
+              itemClassName="market-list-item"
+              showGradients={true}
+            />
+          </div>
         )}
       </div>
+
+
     </div>
   );
 };

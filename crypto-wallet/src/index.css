@@ -3,12 +3,14 @@
   --bg-card: #1E1E2E;
   --text-primary: #FFFFFF;
   --text-secondary: #A1A1AA;
-  --primary: #8B5CF6; /* Violet */
+  --primary: #8B5CF6;
+  /* Violet */
+  --primary-rgb: 139, 92, 246;
   --primary-hover: #7C3AED;
   --success: #10B981;
   --danger: #EF4444;
   --border: #2D2D3F;
-  
+
   --font-family: 'Inter', system-ui, -apple-system, sans-serif;
 }
 

@@ -1,9 +1,123 @@
 .wallet-page {
     display: flex;
     flex-direction: column;
-    gap: 2rem;
-    max-width: 800px;
+    gap: 1.5rem;
+    max-width: 1000px;
     margin: 0 auto;
+    padding: 2rem;
+}
+
+.market-ticker {
+    display: none;
+    /* Hide old ticker if any references remain */
+}
+
+.assets-carousel-wrapper {
+    margin: 1rem 0 3rem 0;
+    display: flex;
+    justify-content: center;
+    width: 100%;
+}
+
+.assets-stagnant-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding: 20px 0;
+}
+
+.asset-row-card {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1.25rem 1.5rem;
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: 20px;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.asset-row-card:hover {
+    background: rgba(255, 255, 255, 0.04);
+    transform: translateY(-2px);
+    border-color: rgba(255, 255, 255, 0.1);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+}
+
+.asset-row-left {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.asset-row-img {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background: #1e1e2e;
+}
+
+.asset-row-info {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.asset-row-name {
+    font-weight: 700;
+    font-size: 1.15rem;
+    color: var(--text-primary);
+}
+
+.asset-row-symbol {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    font-weight: 500;
+}
+
+.asset-row-right {
+    display: flex;
+    align-items: center;
+    gap: 32px;
+}
+
+.asset-row-holdings {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 2px;
+}
+
+.asset-row-amount {
+    font-weight: 600;
+    font-size: 1.1rem;
+    color: var(--text-primary);
+}
+
+.asset-row-value {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+}
+
+.asset-row-change {
+    padding: 6px 14px;
+    border-radius: 12px;
+    font-weight: 700;
+    min-width: 85px;
+    text-align: center;
+    font-size: 0.95rem;
+}
+
+.asset-row-change.positive {
+    background: rgba(34, 197, 94, 0.1);
+    color: #22c55e;
+}
+
+.asset-row-change.negative {
+    background: rgba(239, 68, 68, 0.1);
+    color: #ef4444;
 }
 
 .page-header {
@@ -175,6 +289,14 @@
     color: var(--text-secondary);
 }
 
+
+.asset-right {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 0.5rem;
+}
+
 .asset-value {
     display: flex;
     flex-direction: column;
@@ -201,4 +323,62 @@
 .change-pill.negative {
     background-color: rgba(239, 68, 68, 0.1);
     color: var(--danger);
+}
+
+.asset-actions-mini {
+    display: flex;
+    gap: 0.5rem;
+    opacity: 0;
+    transition: opacity 0.2s;
+}
+
+.asset-item:hover .asset-actions-mini {
+    opacity: 1;
+}
+
+@media (max-width: 768px) {
+    .asset-actions-mini {
+        opacity: 1;
+        /* Always show on mobile */
+    }
+}
+
+.btn-mini {
+    padding: 4px 12px;
+    border-radius: 6px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    cursor: pointer;
+    border: none;
+    transition: background-color 0.2s;
+}
+
+.btn-mini.buy {
+    background-color: rgba(34, 197, 94, 0.1);
+    color: #22c55e;
+}
+
+.btn-mini.buy:hover {
+    background-color: rgba(34, 197, 94, 0.2);
+}
+
+.btn-mini.sell {
+    background-color: rgba(239, 68, 68, 0.1);
+    color: #ef4444;
+}
+
+.btn-mini.sell:hover {
+    background-color: rgba(239, 68, 68, 0.2);
+}
+
+.asset-icon-wrapper {
+    width: 40px;
+    height: 40px;
+}
+
+.asset-icon-wrapper img {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    object-fit: cover;
 }

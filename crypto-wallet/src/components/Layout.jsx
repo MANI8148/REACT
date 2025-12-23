@@ -1,37 +1,34 @@
-import React from 'react';
-import { NavLink, Outlet } from 'react-router-dom';
-import { LayoutDashboard, TrendingUp, Wallet, ArrowRightLeft } from 'lucide-react';
-import './Layout.css'; // We'll create this or use inline styles for simplicity given the tools limitations
-
-const Sidebar = () => {
-    return (
-        <aside className="sidebar">
-            <div className="sidebar-header">
-                <h2>CryptoVue</h2>
-            </div>
-            <nav className="sidebar-nav">
-                <NavLink to="/" end className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}>
-                    <LayoutDashboard size={20} />
-                    <span>Overview</span>
-                </NavLink>
-                <NavLink to="/market" className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}>
-                    <TrendingUp size={20} />
-                    <span>Market</span>
-                </NavLink>
-            </nav>
-        </aside>
-    );
-};
+import { useLocation, Outlet } from 'react-router-dom';
+import PillNav from './layout/PillNav';
+import './Layout.css';
 
 const Layout = () => {
+    const location = useLocation();
+
+    const navItems = [
+        { label: 'Wallet', href: '/' },
+        { label: 'Market', href: '/market' },
+        { label: 'Account', href: '/login' }
+    ];
+
     return (
         <div className="layout">
-            <Sidebar />
-            <main className="main-content">
-                <Outlet />
-            </main>
+            <PillNav
+                logo="https://cryptologos.cc/logos/bitcoin-btc-logo.png?v=032"
+                logoAlt="CryptoVue"
+                items={navItems}
+                activeHref={location.pathname}
+                baseColor="#fff"
+                pillColor="#0d0716"
+            />
+            <div className="layout-body">
+                <main className="main-content">
+                    <Outlet />
+                </main>
+            </div>
         </div>
     );
 };
 
 export default Layout;
+

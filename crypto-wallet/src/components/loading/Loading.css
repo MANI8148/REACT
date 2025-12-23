@@ -1,0 +1,75 @@
+.loading-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    min-height: 300px;
+    /* Ensure visibility */
+    width: 100%;
+    background-color: var(--bg-primary, #0f172a);
+    color: var(--text-primary, #fff);
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: 1000;
+}
+
+.wallet-loader {
+    position: relative;
+    margin-bottom: 2rem;
+    animation: float 3s ease-in-out infinite;
+}
+
+.wallet-icon {
+    color: #3b82f6;
+    /* Blue-500 */
+}
+
+.loading-dots {
+    display: flex;
+    justify-content: center;
+    gap: 4px;
+    margin-top: 1rem;
+}
+
+.loading-dots span {
+    width: 8px;
+    height: 8px;
+    background-color: #3b82f6;
+    border-radius: 50%;
+    animation: bounce 1.4s infinite ease-in-out both;
+}
+
+.loading-dots span:nth-child(1) {
+    animation-delay: -0.32s;
+}
+
+.loading-dots span:nth-child(2) {
+    animation-delay: -0.16s;
+}
+
+@keyframes float {
+
+    0%,
+    100% {
+        transform: translateY(0);
+    }
+
+    50% {
+        transform: translateY(-10px);
+    }
+}
+
+@keyframes bounce {
+
+    0%,
+    80%,
+    100% {
+        transform: scale(0);
+    }
+
+    40% {
+        transform: scale(1.0);
+    }
+}

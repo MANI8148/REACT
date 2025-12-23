@@ -44,6 +44,7 @@ export const getMarketChart = async (coinId, days = 365, currency = "usd") => {
     return response.data;
 };
 
+
 export const getCoinDetail = async (coinId) => {
     const response = await api.get(`/coins/${coinId}`, {
         params: {
@@ -57,4 +58,14 @@ export const getCoinDetail = async (coinId) => {
         },
     });
     return response.data;
+};
+
+export const searchCoins = async (query) => {
+    const response = await api.get("/search", {
+        params: {
+            query: query,
+            x_cg_demo_api_key: API_KEY,
+        },
+    });
+    return response.data.coins;
 };

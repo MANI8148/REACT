@@ -1,21 +1,25 @@
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
-import Layout from '../components/Layout';
-import Wallet from '../pages/Wallet/Wallet';
-import Market from '../pages/Market/Market';
-import CoinDetails from '../pages/CoinDetails/CoinDetails';
+import { BrowserRouter, Routes } from 'react-router-dom';
+import { AuthProvider } from '../context/AuthContext';
+import AppRoutes from './routes';
 
 function App() {
   return (
-    <BrowserRouter>
-      <Routes>
-        <Route path="/" element={<Layout />}>
-          <Route index element={<Wallet />} />
-          <Route path="market" element={<Market />} />
-          <Route path="coin/:id" element={<CoinDetails />} />
-        </Route>
-      </Routes>
-    </BrowserRouter>
+    <AuthContextWrapper>
+      <BrowserRouter>
+        <Routes>
+          {AppRoutes}
+        </Routes>
+      </BrowserRouter>
+    </AuthContextWrapper>
   );
 }
 
+const AuthContextWrapper = ({ children }) => (
+  <AuthProvider>
+    {children}
+  </AuthProvider>
+);
+
 export default App;
+
+
