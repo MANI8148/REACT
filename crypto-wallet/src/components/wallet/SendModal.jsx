@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { X, ArrowRight, Wallet, ShieldCheck, Lock } from 'lucide-react';
+import { X, Send, ArrowRight, Lock, User } from 'lucide-react';
 import TransactionSimulator from './TransactionSimulator';
-import './BuySellModal.css';
+import './BuySellModal.css'; // Reusing styles for consistency
 
-const BuySellModal = ({ isOpen, onClose, type, asset, onConfirm, currentPrice, availableAssets = [] }) => {
+const SendModal = ({ isOpen, onClose, asset, onConfirm, availableAssets = [] }) => {
     const [amount, setAmount] = useState('');
-    const [estimatedValue, setEstimatedValue] = useState(0);
+    const [address, setAddress] = useState('');
     const [showSimulation, setShowSimulation] = useState(false);
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
@@ -13,26 +13,16 @@ const BuySellModal = ({ isOpen, onClose, type, asset, onConfirm, currentPrice, a
     useEffect(() => {
         if (isOpen) {
             setAmount('');
-            setEstimatedValue(0);
+            setAddress('');
             setShowSimulation(false);
             setPassword('');
             setError('');
         }
     }, [isOpen]);
 
-    const handleAmountChange = (e) => {
-        const val = e.target.value;
-        setAmount(val);
-        setEstimatedValue(parseFloat(val || 0) * currentPrice);
-    };
-
     if (!isOpen) return null;
 
-    const assetsToDisplay = availableAssets.length > 0 ? availableAssets : [
-        { id: 'bitcoin', name: 'Bitcoin', symbol: 'BTC' },
-        { id: 'ethereum', name: 'Ethereum', symbol: 'ETH' },
-        { id: 'solana', name: 'Solana', symbol: 'SOL' },
-    ];
+    const assetsToDisplay = availableAssets.length > 0 ? availableAssets : [asset];
 
     return (
         <div className="modal-overlay">
@@ -42,10 +32,10 @@ const BuySellModal = ({ isOpen, onClose, type, asset, onConfirm, currentPrice, a
                 </button>
 
                 <div className="modal-header">
-                    <div className={`icon-circle ${type}`}>
-                        <Wallet size={24} />
+                    <div className="icon-circle buy">
+                        <Send size={24} />
                     </div>
-                    <h2>{type === 'buy' ? 'Buy Asset' : 'Sell Asset'}</h2>
+                    <h2>Send Crypto</h2>
                 </div>
 
                 <div className="form-group">
@@ -53,13 +43,7 @@ const BuySellModal = ({ isOpen, onClose, type, asset, onConfirm, currentPrice, a
                     <select
                         className="asset-select"
                         value={asset?.id || 'bitcoin'}
-                        onChange={(e) => {
-                            const selected = assetsToDisplay.find(a => a.id === e.target.value);
-                            if (selected) {
-                                // In a real scenario, we'd notify parent to update price/asset
-                                console.log("Selected asset:", selected);
-                            }
-                        }}
+                        disabled
                         style={{
                             width: '100%',
                             padding: '12px',
@@ -69,22 +53,25 @@ const BuySellModal = ({ isOpen, onClose, type, asset, onConfirm, currentPrice, a
                             color: '#fff',
                             fontSize: '16px',
                             outline: 'none',
-                            marginBottom: '1rem'
+                            marginBottom: '1rem',
+                            opacity: 0.7
                         }}
                     >
-                        {assetsToDisplay.map(coin => (
-                            <option key={coin.id} value={coin.id}>
-                                {coin.name} ({coin.symbol})
-                            </option>
-                        ))}
+                        <option value={asset?.id}>{asset?.name} ({asset?.symbol})</option>
                     </select>
                 </div>
 
-                <div className="asset-preview">
-                    <div className={`coin-icon ${asset?.symbol?.toLowerCase()}`}>{asset?.symbol?.[0]}</div>
-                    <div className="asset-info">
-                        <h3>{asset?.name}</h3>
-                        <span>Current Price: ${currentPrice.toLocaleString()}</span>
+                <div className="form-group">
+                    <label>Recipient Address</label>
+                    <div className="input-with-icon">
+                        <User size={16} className="input-icon" />
+                        <input
+                            type="text"
+                            placeholder="Enter 0x address or ENS"
+                            value={address}
+                            onChange={(e) => setAddress(e.target.value)}
+                            style={{ paddingLeft: '40px' }}
+                        />
                     </div>
                 </div>
 
@@ -94,52 +81,44 @@ const BuySellModal = ({ isOpen, onClose, type, asset, onConfirm, currentPrice, a
                         <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>
                             Available: {asset?.amount || 0} {asset?.symbol}
                         </span>
-                        {type === 'sell' && (
-                            <button
-                                onClick={() => handleAmountChange({ target: { value: asset?.amount || 0 } })}
-                                style={{ background: 'none', border: 'none', color: 'var(--primary)', fontSize: '0.75rem', cursor: 'pointer' }}
-                            >
-                                Max
-                            </button>
-                        )}
+                        <button
+                            onClick={() => setAmount(asset?.amount || 0)}
+                            style={{ background: 'none', border: 'none', color: 'var(--primary)', fontSize: '0.75rem', cursor: 'pointer' }}
+                        >
+                            Max
+                        </button>
                     </div>
                     <input
                         type="number"
                         placeholder="0.00"
                         value={amount}
-                        onChange={handleAmountChange}
+                        onChange={(e) => setAmount(e.target.value)}
                         min="0"
-                        max={type === 'sell' ? asset?.amount : undefined}
+                        max={asset?.amount}
                     />
-                </div>
-
-                <div className="summary-row">
-                    <span>Estimated Value</span>
-                    <span className="value">${estimatedValue.toLocaleString()}</span>
                 </div>
 
                 {!showSimulation ? (
                     <button
-                        className={`confirm-btn ${type}`}
+                        className="confirm-btn buy"
                         onClick={() => setShowSimulation(true)}
-                        disabled={!amount || parseFloat(amount) <= 0}
+                        disabled={!amount || parseFloat(amount) <= 0 || !address}
                     >
-                        {type === 'buy' ? 'Review Purchase' : 'Review Sale'} <ArrowRight size={16} />
+                        Review Transaction <ArrowRight size={16} />
                     </button>
                 ) : (
                     <div className="security-layer">
                         <TransactionSimulator
                             tx={{
-                                type,
+                                type: 'send',
                                 amount: parseFloat(amount),
                                 symbol: asset?.symbol,
-                                costUsd: estimatedValue.toFixed(2),
-                                targetAddress: '0x3c...8f2a', // Mock
-                                gasPrice: 25 // Mock
+                                targetAddress: address,
+                                gasPrice: 20
                             }}
                             onApprove={() => {
-                                if (password === '1234') { // Using PIN for demo
-                                    onConfirm(parseFloat(amount), type);
+                                if (password === '1234') {
+                                    onConfirm(parseFloat(amount), 'send', asset.id);
                                     onClose();
                                 } else {
                                     setError('Invalid PIN for signing');
@@ -163,9 +142,17 @@ const BuySellModal = ({ isOpen, onClose, type, asset, onConfirm, currentPrice, a
                 )}
             </div>
             <style jsx>{`
-                .security-layer {
-                    margin-top: 1rem;
+                .input-with-icon {
+                    position: relative;
+                    display: flex;
+                    align-items: center;
                 }
+                .input-icon {
+                    position: absolute;
+                    left: 14px;
+                    color: var(--text-secondary);
+                }
+                .security-layer { margin-top: 1rem; }
                 .signing-field {
                     margin-top: 1rem;
                     background: rgba(255, 255, 255, 0.05);
@@ -190,9 +177,7 @@ const BuySellModal = ({ isOpen, onClose, type, asset, onConfirm, currentPrice, a
                     text-align: center;
                     letter-spacing: 4px;
                 }
-                .signing-field input.error {
-                    border-color: #ef4444;
-                }
+                .signing-field input.error { border-color: #ef4444; }
                 .error-text {
                     color: #ef4444;
                     font-size: 0.8rem;
@@ -204,4 +189,4 @@ const BuySellModal = ({ isOpen, onClose, type, asset, onConfirm, currentPrice, a
     );
 };
 
-export default BuySellModal;
+export default SendModal;

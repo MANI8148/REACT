@@ -3,6 +3,7 @@ const mongoose = require('mongoose');
 const cors = require('cors');
 const dotenv = require('dotenv');
 const authRoutes = require('./routes/auth');
+const walletRoutes = require('./routes/wallet');
 
 dotenv.config();
 
@@ -20,6 +21,7 @@ mongoose.connect(process.env.MONGO_URI || 'mongodb://localhost:27017/crypto-wall
 
 // Routes
 app.use('/api/auth', authRoutes);
+app.use('/api/wallet', walletRoutes);
 
 app.get('/', (req, res) => {
     res.send('Crypto Wallet API is running');

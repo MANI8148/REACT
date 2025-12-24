@@ -2,6 +2,7 @@ const router = require('express').Router();
 const User = require('../models/User');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
+const axios = require('axios');
 
 // REGISTER
 router.post('/register', async (req, res) => {
@@ -21,11 +22,46 @@ router.post('/register', async (req, res) => {
             username,
             email,
             password: hashedPassword,
-            assets: [
-                { id: 'bitcoin', symbol: 'btc', name: 'Bitcoin', amount: 0.05, image: 'https://assets.coingecko.com/coins/images/1/large/bitcoin.png' },
-                { id: 'ethereum', symbol: 'eth', name: 'Ethereum', amount: 0.5, image: 'https://assets.coingecko.com/coins/images/279/large/ethereum.png' }
-            ] // Give some default assets for demo
+            walletBalance: 1000, // Starting USD balance
+            assets: []
         });
+
+        // Assign $10,000 worth of random assets from API
+        try {
+            const coinResponse = await axios.get('https://api.coingecko.com/api/v3/coins/markets', {
+                params: {
+                    vs_currency: 'usd',
+                    order: 'market_cap_desc',
+                    per_page: 50,
+                    page: 1,
+                    sparkline: false
+                }
+            });
+
+            const topCoins = coinResponse.data;
+            const selectedCoins = [];
+            for (let i = 0; i < 3; i++) {
+                const randomIdx = Math.floor(Math.random() * topCoins.length);
+                selectedCoins.push(topCoins.splice(randomIdx, 1)[0]);
+            }
+
+            const totalToAllocate = 10000;
+            const allocationPerCoin = totalToAllocate / selectedCoins.length;
+
+            newUser.assets = selectedCoins.map(coin => ({
+                id: coin.id,
+                symbol: coin.symbol,
+                name: coin.name,
+                amount: allocationPerCoin / coin.current_price,
+                image: coin.image
+            }));
+        } catch (apiErr) {
+            console.error("Failed to fetch random assets:", apiErr.message);
+            // Fallback to static assets if API fails
+            newUser.assets = [
+                { id: 'bitcoin', symbol: 'btc', name: 'Bitcoin', amount: 10000 / 60000, image: 'https://assets.coingecko.com/coins/images/1/large/bitcoin.png' }
+            ];
+        }
 
         const savedUser = await newUser.save();
         res.status(201).json({ message: "User created successfully" });
@@ -46,6 +82,42 @@ router.post('/login', async (req, res) => {
         // Check password
         const validPass = await bcrypt.compare(password, user.password);
         if (!validPass) return res.status(400).json({ message: "Invalid password" });
+
+        // For demo purposes: if user has no assets, give them $10,000 random assets
+        if (!user.assets || user.assets.length === 0) {
+            try {
+                const coinResponse = await axios.get('https://api.coingecko.com/api/v3/coins/markets', {
+                    params: {
+                        vs_currency: 'usd',
+                        order: 'market_cap_desc',
+                        per_page: 50,
+                        page: 1,
+                        sparkline: false
+                    }
+                });
+
+                const topCoins = coinResponse.data;
+                const selectedCoins = [];
+                for (let i = 0; i < 3; i++) {
+                    const randomIdx = Math.floor(Math.random() * topCoins.length);
+                    selectedCoins.push(topCoins.splice(randomIdx, 1)[0]);
+                }
+
+                const totalToAllocate = 10000;
+                const allocationPerCoin = totalToAllocate / selectedCoins.length;
+
+                user.assets = selectedCoins.map(coin => ({
+                    id: coin.id,
+                    symbol: coin.symbol,
+                    name: coin.name,
+                    amount: allocationPerCoin / coin.current_price,
+                    image: coin.image
+                }));
+                await user.save();
+            } catch (apiErr) {
+                console.error("Failed to fetch random assets on login:", apiErr.message);
+            }
+        }
 
         // Create token
         const token = jwt.sign({ _id: user._id }, process.env.JWT_SECRET || 'secretKey', { expiresIn: '1h' });

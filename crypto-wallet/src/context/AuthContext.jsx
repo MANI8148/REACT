@@ -1,4 +1,5 @@
 import React, { createContext, useState, useEffect, useContext, useCallback, useRef } from 'react';
+import axios from 'axios';
 import SecurityService from '../services/SecurityService';
 
 const AuthContext = createContext(null);
@@ -43,18 +44,20 @@ export const AuthProvider = ({ children }) => {
 
     const login = async (email, password) => {
         try {
-            // Mocking local response for development
-            const mockUser = { id: '1', username: email.split('@')[0], email };
+            const response = await axios.post('http://localhost:5000/api/auth/login', { email, password });
+            const { token, user } = response.data;
 
             // SECURITY: Simulate 2FA requirement for demonstration
             setIs2FARequired(true);
 
-            // Store temporarily until 2FA is cleared
-            sessionStorage.setItem('pendingUser', JSON.stringify(mockUser));
+            // Store token and user temporarily
+            sessionStorage.setItem('pendingToken', token);
+            sessionStorage.setItem('pendingUser', JSON.stringify(user));
+
             return { success: true, requires2FA: true };
         } catch (error) {
             console.error("Login error", error);
-            return { success: false, message: "Login failed" };
+            return { success: false, message: error.response?.data?.message || "Login failed" };
         }
     };
 
@@ -62,10 +65,14 @@ export const AuthProvider = ({ children }) => {
         // Mock 2FA verification - accepted code is '123456'
         if (code === '123456') {
             const pendingUser = JSON.parse(sessionStorage.getItem('pendingUser'));
-            if (pendingUser) {
+            const pendingToken = sessionStorage.getItem('pendingToken');
+
+            if (pendingUser && pendingToken) {
                 localStorage.setItem('user', JSON.stringify(pendingUser));
+                localStorage.setItem('token', pendingToken);
                 setUser(pendingUser);
                 sessionStorage.removeItem('pendingUser');
+                sessionStorage.removeItem('pendingToken');
                 setIs2FARequired(false);
                 return { success: true };
             }
@@ -83,26 +90,17 @@ export const AuthProvider = ({ children }) => {
 
     const register = async (username, email, password) => {
         try {
-            // SECURITY: Generate a new mnemonic for the user on registration
+            const response = await axios.post('http://localhost:5000/api/auth/register', { username, email, password });
+
+            // Generate mnemonic for security as before
             const mnemonic = SecurityService.generateMnemonic();
             const encryptedMnemonic = SecurityService.encryptData(mnemonic, password);
-
-            const mockUser = {
-                id: '1',
-                username,
-                email,
-                isSecure: true,
-                walletSetup: true
-            };
-
-            // Store encrypted mnemonic locally
             localStorage.setItem('wallet_vault', encryptedMnemonic);
-            localStorage.setItem('user', JSON.stringify(mockUser));
 
-            setUser(mockUser);
-            return { success: true, mnemonic }; // Return mnemonic once for user to backup
+            return { success: true, mnemonic };
         } catch (error) {
-            return { success: false, message: "Registration failed" };
+            console.error("Registration error", error);
+            return { success: false, message: error.response?.data?.message || "Registration failed" };
         }
     }
 

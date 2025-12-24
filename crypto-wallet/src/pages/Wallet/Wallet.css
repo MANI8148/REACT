@@ -122,6 +122,32 @@
     color: #ef4444;
 }
 
+.asset-row-actions {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.transfer-mini-btn {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: var(--text-secondary);
+    padding: 8px;
+    border-radius: 10px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+}
+
+.transfer-mini-btn:hover {
+    background: var(--primary);
+    color: white;
+    border-color: var(--primary);
+    transform: scale(1.1);
+}
+
 .page-header {
     display: flex;
     justify-content: space-between;
