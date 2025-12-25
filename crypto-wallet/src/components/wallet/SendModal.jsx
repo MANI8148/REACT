@@ -3,7 +3,7 @@ import { X, Send, ArrowRight, Lock, User } from 'lucide-react';
 import TransactionSimulator from './TransactionSimulator';
 import './BuySellModal.css'; // Reusing styles for consistency
 
-const SendModal = ({ isOpen, onClose, asset, onConfirm, availableAssets = [] }) => {
+const SendModal = ({ isOpen, onClose, asset, onConfirm, availableAssets = [], onAssetChange }) => {
     const [amount, setAmount] = useState('');
     const [address, setAddress] = useState('');
     const [showSimulation, setShowSimulation] = useState(false);
@@ -21,8 +21,6 @@ const SendModal = ({ isOpen, onClose, asset, onConfirm, availableAssets = [] }) 
     }, [isOpen]);
 
     if (!isOpen) return null;
-
-    const assetsToDisplay = availableAssets.length > 0 ? availableAssets : [asset];
 
     return (
         <div className="modal-overlay">
@@ -42,8 +40,13 @@ const SendModal = ({ isOpen, onClose, asset, onConfirm, availableAssets = [] }) 
                     <label>Select Asset</label>
                     <select
                         className="asset-select"
-                        value={asset?.id || 'bitcoin'}
-                        disabled
+                        value={asset?.id || ''}
+                        onChange={(e) => {
+                            const selected = availableAssets.find(a => a.id === e.target.value);
+                            if (selected && onAssetChange) {
+                                onAssetChange(selected);
+                            }
+                        }}
                         style={{
                             width: '100%',
                             padding: '12px',
@@ -53,12 +56,27 @@ const SendModal = ({ isOpen, onClose, asset, onConfirm, availableAssets = [] }) 
                             color: '#fff',
                             fontSize: '16px',
                             outline: 'none',
-                            marginBottom: '1rem',
-                            opacity: 0.7
+                            marginBottom: '1rem'
                         }}
                     >
-                        <option value={asset?.id}>{asset?.name} ({asset?.symbol})</option>
+                        {availableAssets.map(coin => (
+                            <option key={coin.id} value={coin.id}>
+                                {coin.name} ({coin.symbol})
+                            </option>
+                        ))}
                     </select>
+                </div>
+
+                <div className="asset-preview" style={{ display: 'flex', alignItems: 'center', background: 'rgba(255, 255, 255, 0.05)', padding: '1rem', borderRadius: '12px', marginBottom: '1.5rem' }}>
+                    {asset?.image ? (
+                        <img src={asset.image} alt={asset.name} style={{ width: '40px', height: '40px', borderRadius: '50%', marginRight: '12px' }} />
+                    ) : (
+                        <div className={`coin-icon ${asset?.symbol?.toLowerCase()}`} style={{ width: '40px', height: '40px', borderRadius: '50%', background: 'var(--primary)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.2rem', fontWeight: 'bold', marginRight: '12px' }}>{asset?.symbol?.[0]}</div>
+                    )}
+                    <div className="asset-info">
+                        <h3 style={{ margin: 0, fontSize: '1.1rem' }}>{asset?.name}</h3>
+                        <span style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>Available: {asset?.amount || 0} {asset?.symbol}</span>
+                    </div>
                 </div>
 
                 <div className="form-group">

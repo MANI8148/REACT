@@ -44,7 +44,7 @@ export const AuthProvider = ({ children }) => {
 
     const login = async (email, password) => {
         try {
-            const response = await axios.post('http://localhost:5000/api/auth/login', { email, password });
+            const response = await axios.post('http://localhost:5001/api/auth/login', { email, password });
             const { token, user } = response.data;
 
             // SECURITY: Simulate 2FA requirement for demonstration
@@ -90,7 +90,7 @@ export const AuthProvider = ({ children }) => {
 
     const register = async (username, email, password) => {
         try {
-            const response = await axios.post('http://localhost:5000/api/auth/register', { username, email, password });
+            const response = await axios.post('http://localhost:5001/api/auth/register', { username, email, password });
 
             // Generate mnemonic for security as before
             const mnemonic = SecurityService.generateMnemonic();

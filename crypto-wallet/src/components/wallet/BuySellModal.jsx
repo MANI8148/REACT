@@ -1,14 +1,15 @@
 import React, { useState, useEffect } from 'react';
-import { X, ArrowRight, Wallet, ShieldCheck, Lock } from 'lucide-react';
+import { X, ArrowRight, Wallet, ShieldCheck, Lock, Search } from 'lucide-react';
 import TransactionSimulator from './TransactionSimulator';
 import './BuySellModal.css';
 
-const BuySellModal = ({ isOpen, onClose, type, asset, onConfirm, currentPrice, availableAssets = [] }) => {
+const BuySellModal = ({ isOpen, onClose, type, asset, onConfirm, currentPrice, availableAssets = [], onAssetChange }) => {
     const [amount, setAmount] = useState('');
     const [estimatedValue, setEstimatedValue] = useState(0);
     const [showSimulation, setShowSimulation] = useState(false);
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
+    const [searchQuery, setSearchQuery] = useState('');
 
     useEffect(() => {
         if (isOpen) {
@@ -17,6 +18,7 @@ const BuySellModal = ({ isOpen, onClose, type, asset, onConfirm, currentPrice, a
             setShowSimulation(false);
             setPassword('');
             setError('');
+            setSearchQuery('');
         }
     }, [isOpen]);
 
@@ -29,10 +31,18 @@ const BuySellModal = ({ isOpen, onClose, type, asset, onConfirm, currentPrice, a
     if (!isOpen) return null;
 
     const assetsToDisplay = availableAssets.length > 0 ? availableAssets : [
-        { id: 'bitcoin', name: 'Bitcoin', symbol: 'BTC' },
-        { id: 'ethereum', name: 'Ethereum', symbol: 'ETH' },
-        { id: 'solana', name: 'Solana', symbol: 'SOL' },
+        { id: 'bitcoin', name: 'Bitcoin', symbol: 'BTC', current_price: 60000 },
+        { id: 'ethereum', name: 'Ethereum', symbol: 'ETH', current_price: 3000 },
+        { id: 'solana', name: 'Solana', symbol: 'SOL', current_price: 150 },
     ];
+
+    // Filter assets based on search query (only for buy)
+    const filteredAssets = type === 'buy' && searchQuery
+        ? assetsToDisplay.filter(coin =>
+            coin.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            coin.symbol.toLowerCase().includes(searchQuery.toLowerCase())
+        )
+        : assetsToDisplay;
 
     return (
         <div className="modal-overlay">
@@ -48,16 +58,32 @@ const BuySellModal = ({ isOpen, onClose, type, asset, onConfirm, currentPrice, a
                     <h2>{type === 'buy' ? 'Buy Asset' : 'Sell Asset'}</h2>
                 </div>
 
+                {type === 'buy' && (
+                    <div className="form-group">
+                        <label>Search Assets</label>
+                        <div className="search-input-wrapper">
+                            <Search size={18} className="search-icon" />
+                            <input
+                                type="text"
+                                placeholder="Search by name or symbol..."
+                                value={searchQuery}
+                                onChange={(e) => setSearchQuery(e.target.value)}
+                                className="search-input"
+                            />
+                        </div>
+                    </div>
+                )}
+
                 <div className="form-group">
                     <label>Select Asset</label>
                     <select
                         className="asset-select"
-                        value={asset?.id || 'bitcoin'}
+                        value={asset?.id || ''}
                         onChange={(e) => {
                             const selected = assetsToDisplay.find(a => a.id === e.target.value);
-                            if (selected) {
-                                // In a real scenario, we'd notify parent to update price/asset
-                                console.log("Selected asset:", selected);
+                            if (selected && onAssetChange) {
+                                onAssetChange(selected);
+                                setSearchQuery(''); // Clear search after selection
                             }
                         }}
                         style={{
@@ -72,7 +98,7 @@ const BuySellModal = ({ isOpen, onClose, type, asset, onConfirm, currentPrice, a
                             marginBottom: '1rem'
                         }}
                     >
-                        {assetsToDisplay.map(coin => (
+                        {filteredAssets.map(coin => (
                             <option key={coin.id} value={coin.id}>
                                 {coin.name} ({coin.symbol})
                             </option>
@@ -81,7 +107,11 @@ const BuySellModal = ({ isOpen, onClose, type, asset, onConfirm, currentPrice, a
                 </div>
 
                 <div className="asset-preview">
-                    <div className={`coin-icon ${asset?.symbol?.toLowerCase()}`}>{asset?.symbol?.[0]}</div>
+                    {asset?.image ? (
+                        <img src={asset.image} alt={asset.name} style={{ width: '40px', height: '40px', borderRadius: '50%', marginRight: '12px' }} />
+                    ) : (
+                        <div className={`coin-icon ${asset?.symbol?.toLowerCase()}`}>{asset?.symbol?.[0]}</div>
+                    )}
                     <div className="asset-info">
                         <h3>{asset?.name}</h3>
                         <span>Current Price: ${currentPrice.toLocaleString()}</span>

@@ -2,16 +2,18 @@ import React from 'react';
 import { AlertTriangle, Info, ShieldCheck, Zap } from 'lucide-react';
 
 const TransactionSimulator = ({ tx, onApprove, onCancel }) => {
-    // Simulated risk analysis
-    const isUnknownContract = tx.targetAddress?.startsWith('0x3c'); // Mock check
-    const isHighGas = tx.gasPrice > 50; // Mock check
-    const isUnlimitedApproval = tx.type === 'approval' && tx.amount === 'unlimited';
+    // Only show contract warnings for send transactions
+    const isUnknownContract = tx.type === 'send' && tx.targetAddress?.startsWith('0x3c');
+    const isHighGas = tx.gasPrice > 50;
+
+    // For buy/sell, show simple balance impact
+    const isBuyOrSell = tx.type === 'buy' || tx.type === 'sell';
 
     return (
         <div className="simulation-container">
             <div className="simulation-header">
-                <h3>Transaction Simulation</h3>
-                <p>Review the predicted outcome of this transaction.</p>
+                <h3>Transaction Review</h3>
+                <p>Review the details of this transaction.</p>
             </div>
 
             <div className="simulation-summary">
@@ -20,57 +22,74 @@ const TransactionSimulator = ({ tx, onApprove, onCancel }) => {
                     <span className="value">{tx.type.toUpperCase()}</span>
                 </div>
                 <div className="summary-item">
-                    <span className="label">Estimated Cost</span>
-                    <span className="value">${tx.costUsd || '0.00'}</span>
+                    <span className="label">Amount</span>
+                    <span className="value">{tx.amount} {tx.symbol}</span>
                 </div>
                 <div className="summary-item">
-                    <span className="label">Network Impact</span>
-                    <span className="value negative">-{tx.amount} {tx.symbol}</span>
+                    <span className="label">{tx.type === 'buy' ? 'Total Cost' : 'You Receive'}</span>
+                    <span className="value">${tx.costUsd || '0.00'}</span>
                 </div>
+                {tx.type === 'buy' && (
+                    <div className="summary-item">
+                        <span className="label">Balance Impact</span>
+                        <span className="value negative">-${tx.costUsd || '0.00'} USD</span>
+                    </div>
+                )}
+                {tx.type === 'sell' && (
+                    <div className="summary-item">
+                        <span className="label">Balance Impact</span>
+                        <span className="value positive">+${tx.costUsd || '0.00'} USD</span>
+                    </div>
+                )}
             </div>
 
-            <div className="risk-analysis">
-                {isUnlimitedApproval && (
-                    <div className="risk-item critical">
-                        <AlertTriangle size={20} />
-                        <div>
-                            <strong>Unlimited Approval</strong>
-                            <p>This allow the contract to spend ALL your {tx.symbol}.</p>
+            {!isBuyOrSell && (
+                <div className="risk-analysis">
+                    {isUnknownContract && (
+                        <div className="risk-item warning">
+                            <AlertTriangle size={20} />
+                            <div>
+                                <strong>Unknown Address</strong>
+                                <p>This address has no reputation. Proceed with caution.</p>
+                            </div>
                         </div>
-                    </div>
-                )}
-                {isUnknownContract && (
-                    <div className="risk-item warning">
-                        <AlertTriangle size={20} />
-                        <div>
-                            <strong>Unknown Contract</strong>
-                            <p>This address has no reputation. Proceed with extreme caution.</p>
+                    )}
+                    {isHighGas && (
+                        <div className="risk-item info">
+                            <Zap size={20} />
+                            <div>
+                                <strong>High Gas Fee</strong>
+                                <p>Network is congested. You might want to wait.</p>
+                            </div>
                         </div>
-                    </div>
-                )}
-                {isHighGas && (
-                    <div className="risk-item info">
-                        <Zap size={20} />
-                        <div>
-                            <strong>High Gas Fee</strong>
-                            <p>Network is congested. You might want to wait.</p>
+                    )}
+                    {!isUnknownContract && (
+                        <div className="risk-item safe">
+                            <ShieldCheck size={20} />
+                            <div>
+                                <strong>Safe to Proceed</strong>
+                                <p>No major risks detected.</p>
+                            </div>
                         </div>
-                    </div>
-                )}
-                {!isUnlimitedApproval && !isUnknownContract && (
+                    )}
+                </div>
+            )}
+
+            {isBuyOrSell && (
+                <div className="risk-analysis">
                     <div className="risk-item safe">
                         <ShieldCheck size={20} />
                         <div>
-                            <strong>Safe to Proceed</strong>
-                            <p>No major risks detected in this simulation.</p>
+                            <strong>Transaction Ready</strong>
+                            <p>Review the details above and confirm to proceed.</p>
                         </div>
                     </div>
-                )}
-            </div>
+                </div>
+            )}
 
             <div className="simulation-actions">
-                <button className="cancel-btn" onClick={onCancel}>Decline</button>
-                <button className="approve-btn" onClick={onApprove}>Authorize Transaction</button>
+                <button className="cancel-btn" onClick={onCancel}>Cancel</button>
+                <button className="approve-btn" onClick={onApprove}>Confirm Transaction</button>
             </div>
 
             <style jsx>{`
@@ -109,6 +128,10 @@ const TransactionSimulator = ({ tx, onApprove, onCancel }) => {
                 }
                 .summary-item .value.negative {
                     color: #ef4444;
+                    font-weight: 600;
+                }
+                .summary-item .value.positive {
+                    color: #10b981;
                     font-weight: 600;
                 }
                 .risk-analysis {

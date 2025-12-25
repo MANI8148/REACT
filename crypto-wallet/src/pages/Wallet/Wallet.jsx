@@ -23,6 +23,7 @@ const Wallet = () => {
         { id: 'bitcoin', name: 'Cold BTC', symbol: 'BTC', amount: 1.2, value: 0, change: 0, image: 'https://assets.coingecko.com/coins/images/1/large/bitcoin.png' },
         { id: 'ethereum', name: 'Cold ETH', symbol: 'ETH', amount: 10, value: 0, change: 0, image: 'https://assets.coingecko.com/coins/images/279/large/ethereum.png' },
     ]);
+    const [marketCoins, setMarketCoins] = useState([]);
     const [walletBalance, setWalletBalance] = useState(0);
     const [isOffline, setIsOffline] = useState(false);
     const [showSecurityModal, setShowSecurityModal] = useState(false);
@@ -38,7 +39,7 @@ const Wallet = () => {
                 const token = localStorage.getItem('token');
                 if (!token) return;
 
-                const response = await axios.get('http://localhost:5000/api/wallet/data', {
+                const response = await axios.get('http://localhost:5001/api/wallet/data', {
                     headers: { Authorization: `Bearer ${token}` }
                 });
 
@@ -47,6 +48,7 @@ const Wallet = () => {
 
                 // Fetch real-time market data
                 const marketData = await getCoinsMarkets();
+                setMarketCoins(marketData);
 
                 const updatedAssets = userAssets.map(asset => {
                     const marketCoin = marketData.find(c => c.id === asset.id);
@@ -101,8 +103,33 @@ const Wallet = () => {
         setShowSecurityModal(false);
     };
 
+    const handleAssetChange = (newAsset) => {
+        // Find existing owned asset or use market coin
+        const owned = currentAssets.find(a => a.id === newAsset.id);
+        const market = marketCoins.find(a => a.id === newAsset.id);
+
+        const mergedAsset = {
+            ...newAsset,
+            ...(owned || {}),
+            price: market?.current_price || newAsset.price || 0,
+            image: market?.image || newAsset.image || FALLBACK_IMAGE
+        };
+
+        if (modalConfig.isOpen) {
+            setModalConfig(prev => ({ ...prev, asset: mergedAsset }));
+        }
+        if (isSendModalOpen || isReceiveModalOpen) {
+            setActiveAsset(mergedAsset);
+        }
+    };
+
     const openModal = (type, assetId = 'bitcoin') => {
-        const asset = assets.find(a => a.id === assetId) || assets[0];
+        let asset;
+        if (type === 'buy') {
+            asset = marketCoins.find(a => a.id === assetId) || marketCoins[0];
+        } else {
+            asset = currentAssets.find(a => a.id === assetId) || currentAssets[0];
+        }
         setModalConfig({ isOpen: true, type, asset });
     };
 
@@ -112,7 +139,7 @@ const Wallet = () => {
 
         try {
             const token = localStorage.getItem('token');
-            const response = await axios.post('http://localhost:5000/api/wallet/transaction', {
+            const response = await axios.post('http://localhost:5001/api/wallet/transaction', {
                 type,
                 assetId: targetAsset.id,
                 amount,
@@ -313,7 +340,9 @@ const Wallet = () => {
                 onClose={() => setModalConfig({ ...modalConfig, isOpen: false })}
                 type={modalConfig.type}
                 asset={modalConfig.asset}
-                currentPrice={modalConfig.asset?.price || 0}
+                currentPrice={modalConfig.asset?.price || (modalConfig.type === 'buy' ? modalConfig.asset?.current_price : 0) || 0}
+                availableAssets={modalConfig.type === 'buy' ? marketCoins : currentAssets}
+                onAssetChange={handleAssetChange}
                 onConfirm={handleTransaction}
             />
 
@@ -329,14 +358,18 @@ const Wallet = () => {
                 isOpen={isSendModalOpen}
                 onClose={() => setIsSendModalOpen(false)}
                 asset={activeAsset}
-                onConfirm={handleTransaction}
                 availableAssets={currentAssets}
+                onAssetChange={handleAssetChange}
+                onConfirm={handleTransaction}
             />
 
             <ReceiveModal
                 isOpen={isReceiveModalOpen}
                 onClose={() => setIsReceiveModalOpen(false)}
                 asset={activeAsset}
+                availableAssets={currentAssets}
+                onAssetChange={handleAssetChange}
+                onConfirm={handleTransaction}
             />
         </div>
     );

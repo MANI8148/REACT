@@ -2,7 +2,7 @@ import React from 'react';
 import { X, Copy, Check, QrCode } from 'lucide-react';
 import './BuySellModal.css';
 
-const ReceiveModal = ({ isOpen, onClose, asset, onConfirm }) => {
+const ReceiveModal = ({ isOpen, onClose, asset, onConfirm, availableAssets = [], onAssetChange }) => {
     const [copied, setCopied] = React.useState(false);
     const mockAddress = "0x71C7656EC7ab88b098defB751B7401B5f6d8976F";
 
@@ -25,8 +25,50 @@ const ReceiveModal = ({ isOpen, onClose, asset, onConfirm }) => {
                     <div className="icon-circle sell">
                         <QrCode size={24} />
                     </div>
-                    <h2>Receive {asset?.name}</h2>
-                    <p>Scan the QR code or copy the address below</p>
+                    <h2>Receive Crypto</h2>
+                    <p>Select asset and scan the QR code or copy the address</p>
+                </div>
+
+                <div className="form-group" style={{ textAlign: 'left', marginBottom: '1rem' }}>
+                    <label style={{ display: 'block', fontSize: '0.85rem', color: 'var(--text-secondary)', marginBottom: '8px' }}>Select Asset</label>
+                    <select
+                        className="asset-select"
+                        value={asset?.id || ''}
+                        onChange={(e) => {
+                            const selected = availableAssets.find(a => a.id === e.target.value);
+                            if (selected && onAssetChange) {
+                                onAssetChange(selected);
+                            }
+                        }}
+                        style={{
+                            width: '100%',
+                            padding: '12px',
+                            background: '#0f172a',
+                            border: '1px solid #334155',
+                            borderRadius: '8px',
+                            color: '#fff',
+                            fontSize: '16px',
+                            outline: 'none'
+                        }}
+                    >
+                        {availableAssets.map(coin => (
+                            <option key={coin.id} value={coin.id}>
+                                {coin.name} ({coin.symbol})
+                            </option>
+                        ))}
+                    </select>
+                </div>
+
+                <div className="asset-preview" style={{ display: 'flex', alignItems: 'center', background: 'rgba(255, 255, 255, 0.05)', padding: '1rem', borderRadius: '12px', marginBottom: '1.5rem' }}>
+                    {asset?.image ? (
+                        <img src={asset.image} alt={asset.name} style={{ width: '40px', height: '40px', borderRadius: '50%', marginRight: '12px' }} />
+                    ) : (
+                        <div className={`coin-icon ${asset?.symbol?.toLowerCase()}`} style={{ width: '40px', height: '40px', borderRadius: '50%', background: 'var(--primary)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.2rem', fontWeight: 'bold', marginRight: '12px' }}>{asset?.symbol?.[0]}</div>
+                    )}
+                    <div className="asset-info" style={{ textAlign: 'left' }}>
+                        <h3 style={{ margin: 0, fontSize: '1.1rem' }}>{asset?.name}</h3>
+                        <span style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>Address ready to receive</span>
+                    </div>
                 </div>
 
                 <div style={{ marginBottom: '1.5rem' }}>

@@ -36,22 +36,24 @@ class SecurityService {
     static encryptData(data, password) {
         // Generate a random salt for PBKDF2
         const salt = CryptoJS.lib.WordArray.random(128 / 8);
+        // Generate a separate IV
+        const iv = CryptoJS.lib.WordArray.random(128 / 8);
 
-        // Derive key using PBKDF2
+        // Derive key using PBKDF2 with 100,000 iterations (OWASP recommendation)
         const key = CryptoJS.PBKDF2(password, salt, {
             keySize: 256 / 32,
-            iterations: 1000
+            iterations: 100000 // Increased from 1,000 to 100,000
         });
 
         // Encrypt data
         const encrypted = CryptoJS.AES.encrypt(data, key, {
-            iv: salt, // Using salt as IV for simplicity in this demo, though usually separate
+            iv: iv,
             padding: CryptoJS.pad.Pkcs7,
             mode: CryptoJS.mode.CBC
         });
 
-        // Store salt and ciphertext together
-        return salt.toString() + ":" + encrypted.toString();
+        // Store salt, IV, and ciphertext together
+        return salt.toString() + ":" + iv.toString() + ":" + encrypted.toString();
     }
 
     /**
@@ -64,15 +66,16 @@ class SecurityService {
         try {
             const parts = encryptedWithSalt.split(':');
             const salt = CryptoJS.enc.Hex.parse(parts[0]);
-            const ciphertext = parts[1];
+            const iv = CryptoJS.enc.Hex.parse(parts[1]);
+            const ciphertext = parts[2];
 
             const key = CryptoJS.PBKDF2(password, salt, {
                 keySize: 256 / 32,
-                iterations: 1000
+                iterations: 100000 // Match encryption iterations
             });
 
             const decrypted = CryptoJS.AES.decrypt(ciphertext, key, {
-                iv: salt,
+                iv: iv,
                 padding: CryptoJS.pad.Pkcs7,
                 mode: CryptoJS.mode.CBC
             });
