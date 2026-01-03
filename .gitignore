@@ -1,0 +1,15 @@
+# OS Lab Suite
+oslabx-suite/backend/node_modules/
+oslabx-suite/frontend/node_modules/
+oslabx-suite/frontend/.next/
+oslabx-suite/backend/.env
+oslabx-suite/backend/.env.local
+oslabx-suite/frontend/.env.local
+
+# General
+node_modules/
+.DS_Store
+.vscode/
+*.o
+*.out
+*.exe
