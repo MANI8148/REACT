@@ -15,6 +15,7 @@ export default function Home() {
     { title: 'CPU Scheduling', icon: <Cpu className="w-8 h-8 text-blue-400" />, href: '/cpu', desc: 'Simulate FCFS, Round Robin, SRTF with real-time Gantt charts.' },
     { title: 'Memory Management', icon: <MemoryStick className="w-8 h-8 text-purple-400" />, href: '/ram', desc: 'Visualize Paging, Segmentation, and Thashing.' },
     { title: 'File System', icon: <HardDrive className="w-8 h-8 text-green-400" />, href: '/fs', desc: 'Explore Inodes, FAT, and Directory structures.' },
+    { title: 'Threads & Semaphores', icon: <Share2 className="w-8 h-8 text-indigo-400" />, href: '/threads', desc: 'Producer-Consumer, Dining Philosophers & Synchronization.' },
     { title: 'Deadlock Detection', icon: <Share2 className="w-8 h-8 text-red-400" />, href: '/deadlock', desc: 'Banker\'s algorithm and Resource Allocation Graphs.' },
   ];
 
@@ -33,8 +34,8 @@ export default function Home() {
             onClick={() => dispatch(startSimulation())}
             disabled={isRunning}
             className={`px-6 py-2 rounded-full font-medium transition-all flex items-center gap-2 ${isRunning
-                ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20'
-                : 'bg-blue-600 hover:bg-blue-700 text-white shadow-lg shadow-blue-600/30'
+              ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20'
+              : 'bg-blue-600 hover:bg-blue-700 text-white shadow-lg shadow-blue-600/30'
               }`}
           >
             {isRunning ? <> <div className="w-2 h-2 bg-emerald-400 rounded-full animate-pulse" /> Live </> : <> <Play size={18} /> Run Simulator </>}

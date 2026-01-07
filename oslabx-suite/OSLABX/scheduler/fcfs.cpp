@@ -9,6 +9,8 @@ struct Process {
     int arrival_time;
     int remaining_time;
     int completion_time;
+    int waiting_time;
+    int turn_around_time;
 };
 
 class Scheduler {
@@ -25,6 +27,8 @@ public:
             }
             current_time += p.burst_time;
             p.completion_time = current_time;
+            p.turn_around_time = p.completion_time - p.arrival_time;
+            p.waiting_time = p.turn_around_time - p.burst_time;
         }
         return processes;
     }
@@ -38,7 +42,9 @@ EMSCRIPTEN_BINDINGS(scheduler_module) {
         .field("burst_time", &Process::burst_time)
         .field("arrival_time", &Process::arrival_time)
         .field("remaining_time", &Process::remaining_time)
-        .field("completion_time", &Process::completion_time);
+        .field("completion_time", &Process::completion_time)
+        .field("waiting_time", &Process::waiting_time)
+        .field("turn_around_time", &Process::turn_around_time);
 
     register_vector<Process>("vector<Process>");
 

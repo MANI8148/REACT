@@ -22,6 +22,9 @@ RUN cd frontend && npm install
 # Copy source code
 COPY . .
 
+# Build WASM modules
+RUN ./compile_wasm.sh
+
 # Build step (example)
 # RUN cd backend && npm run build
 # RUN cd frontend && npm run build
