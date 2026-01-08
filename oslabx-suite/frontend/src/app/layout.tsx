@@ -16,6 +16,9 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "OSLabX | Advanced OS Simulator",
   description: "A premium interactive operating system lab with real-time simulations.",
+  icons: {
+    icon: '/icon.svg',
+  },
 };
 
 export default function RootLayout({
