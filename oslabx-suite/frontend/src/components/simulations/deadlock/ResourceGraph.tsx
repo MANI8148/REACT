@@ -109,8 +109,8 @@ export default function ResourceGraph({ processes, resources, allocation, reques
         node.filter((d: any) => d.type === 'process')
             .append("circle")
             .attr("r", 20)
-            .attr("fill", "#3b82f6") // Blue
-            .attr("stroke", "#1e40af")
+            .attr("fill", "#10b981") // Emerald
+            .attr("stroke", "#059669")
             .attr("stroke-width", 2);
 
         // Rects for Resources
@@ -121,8 +121,8 @@ export default function ResourceGraph({ processes, resources, allocation, reques
             .attr("width", 40)
             .attr("height", 40)
             .attr("rx", 4)
-            .attr("fill", "#8b5cf6") // Purple
-            .attr("stroke", "#5b21b6")
+            .attr("fill", "#06b6d4") // Cyan
+            .attr("stroke", "#0891b2")
             .attr("stroke-width", 2);
 
         // Labels

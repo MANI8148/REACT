@@ -2,7 +2,9 @@
 
 import React, { useState, useEffect } from 'react';
 import GanttChart from '@/components/simulations/cpu/GanttChart';
-import { Play, RotateCcw, Plus, Trash2, Cpu } from 'lucide-react';
+import { Play, RotateCcw, Plus, Trash2, Cpu, Activity, Wand2 } from 'lucide-react';
+import { simulationData } from '@/data/simulation_datasets';
+import Link from 'next/link';
 import { useWasmModule } from '@/hooks/useWasmModule';
 import { SchedulerModule, Process } from '@/types/wasm';
 
@@ -40,6 +42,11 @@ export default function CPUPage() {
     };
 
     const currentModule = getCurrentModule();
+
+    const randomizeProcesses = () => {
+        const data = simulationData.cpu[Math.floor(Math.random() * 200)];
+        setProcesses(data);
+    };
 
     const handleAddProcess = () => {
         setProcesses([...processes, {
@@ -163,14 +170,22 @@ export default function CPUPage() {
     };
 
     return (
-        <div className="p-8 max-w-6xl mx-auto min-h-screen">
-            <header className="mb-12 flex items-center gap-4">
-                <div className="p-3 bg-blue-500/10 rounded-2xl">
-                    <Cpu className="text-blue-500 w-8 h-8" />
-                </div>
-                <div>
-                    <h1 className="text-4xl font-bold mb-2">CPU Scheduling</h1>
-                    <p className="text-slate-400">High-performance algorithms compiled from C++ to WASM.</p>
+        <div className="p-8 max-w-full mx-auto min-h-screen bg-slate-950 text-slate-200">
+            <header className="mb-8 flex items-center justify-between">
+                <Link href="/" className="flex items-center gap-3 hover:opacity-80 transition-opacity">
+                    <div className="w-8 h-8 bg-gradient-to-br from-emerald-600 to-teal-700 rounded-lg flex items-center justify-center shadow-lg shadow-emerald-500/20">
+                        <Activity size={18} className="text-white" />
+                    </div>
+                    <h1 className="text-xl font-black tracking-widest uppercase text-white">OSLabX</h1>
+                </Link>
+                <div className="flex items-center gap-4">
+                    <div className="p-2 bg-emerald-500/10 rounded-xl border border-emerald-500/20">
+                        <Cpu className="text-emerald-500 w-5 h-5" />
+                    </div>
+                    <div className="text-right">
+                        <h2 className="text-lg font-black bg-clip-text text-transparent bg-gradient-to-r from-white to-slate-500 tracking-tight">Scheduler Lab</h2>
+                        <p className="text-slate-500 text-[10px] font-bold uppercase tracking-widest">CPU Allocation</p>
+                    </div>
                 </div>
             </header>
 
@@ -179,12 +194,12 @@ export default function CPUPage() {
                 <div className="lg:col-span-1 space-y-6">
 
                     {/* Algorithm Selection */}
-                    <div className="p-6 rounded-2xl bg-slate-900/50 border border-slate-800">
-                        <label className="block text-sm font-bold text-slate-400 mb-3">Algorithm</label>
+                    <div className="p-6 rounded-2xl bg-slate-900/30 border border-slate-800/60 backdrop-blur-xl">
+                        <label className="block text-[10px] font-black text-slate-500 uppercase tracking-widest mb-4 px-1">Policy Selection</label>
                         <select
                             value={algorithm}
                             onChange={(e) => setAlgorithm(e.target.value as AlgoType)}
-                            className="w-full bg-slate-950 border border-slate-800 rounded-lg p-3 text-sm focus:ring-2 focus:ring-blue-500 outline-none"
+                            className="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-[11px] font-bold focus:ring-1 focus:ring-emerald-500 outline-none mb-4"
                         >
                             <option value="fcfs">First Come First Serve (FCFS)</option>
                             <option value="sjf">Shortest Job First (SJF)</option>
@@ -194,75 +209,116 @@ export default function CPUPage() {
 
                         {algorithm === 'rr' && (
                             <div className="mt-4">
-                                <label className="block text-sm font-bold text-slate-400 mb-2">Time Quantum</label>
+                                <label className="block text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2 px-1">Time Quantum</label>
                                 <input
                                     type="number"
                                     value={quantum}
                                     onChange={(e) => setQuantum(Number(e.target.value))}
-                                    className="w-full bg-slate-950 border border-slate-800 rounded-lg p-3 text-sm"
+                                    className="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-[11px] font-bold"
                                 />
                             </div>
                         )}
                     </div>
 
                     {/* Process Input */}
-                    <div className="p-6 rounded-2xl bg-slate-900/50 border border-slate-800">
-                        <h3 className="font-bold mb-4">Add Process</h3>
-                        <div className="space-y-3">
+                    <div className="p-6 rounded-2xl bg-slate-900/30 border border-slate-800/60 backdrop-blur-xl">
+                        <h3 className="font-black text-[10px] uppercase tracking-widest text-emerald-400 mb-4 px-1">Register Job</h3>
+                        <div className="space-y-4">
                             <div className="grid grid-cols-2 gap-3">
                                 <div>
-                                    <label className="text-xs text-slate-500">Arrival</label>
+                                    <label className="block text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2 px-1">Arrival</label>
                                     <input
                                         type="number"
                                         value={newProcess.arrival}
                                         onChange={e => setNewProcess({ ...newProcess, arrival: Number(e.target.value) })}
-                                        className="w-full bg-slate-950 rounded p-2 text-sm border border-slate-800"
+                                        className="w-full bg-slate-950 rounded-xl p-3 text-[11px] font-bold border border-slate-800"
                                     />
                                 </div>
                                 <div>
-                                    <label className="text-xs text-slate-500">Burst</label>
+                                    <label className="block text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2 px-1">Burst</label>
                                     <input
                                         type="number"
                                         value={newProcess.burst}
                                         onChange={e => setNewProcess({ ...newProcess, burst: Number(e.target.value) })}
-                                        className="w-full bg-slate-950 rounded p-2 text-sm border border-slate-800"
+                                        className="w-full bg-slate-950 rounded-xl p-3 text-[11px] font-bold border border-slate-800"
                                     />
                                 </div>
                             </div>
                             {algorithm === 'priority' && (
                                 <div>
-                                    <label className="text-xs text-slate-500">Priority (Lower = Higher)</label>
+                                    <label className="block text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2 px-1">Priority</label>
                                     <input
                                         type="number"
                                         value={newProcess.priority}
                                         onChange={e => setNewProcess({ ...newProcess, priority: Number(e.target.value) })}
-                                        className="w-full bg-slate-950 rounded p-2 text-sm border border-slate-800"
+                                        className="w-full bg-slate-950 rounded-xl p-3 text-[11px] font-bold border border-slate-800"
                                     />
                                 </div>
                             )}
                             <button
                                 onClick={handleAddProcess}
-                                className="w-full py-2 bg-slate-800 hover:bg-slate-700 rounded-lg flex items-center justify-center gap-2 transition-colors text-sm"
+                                className="w-full py-4 bg-slate-800/50 hover:bg-slate-700/50 border border-slate-700/50 rounded-xl flex items-center justify-center gap-2 transition-all font-black text-[10px] uppercase tracking-widest text-slate-300"
                             >
-                                <Plus size={14} /> Add to Queue
+                                <Plus size={14} /> Commit Entry
                             </button>
                         </div>
                     </div>
 
-                    <div className="p-6 rounded-2xl bg-slate-900/50 border border-slate-800">
-                        <h3 className="font-bold mb-4">Process Queue ({processes.length})</h3>
-                        <div className="space-y-2 max-h-[300px] overflow-y-auto pr-2">
-                            {processes.map(p => (
-                                <div key={p.id} className="p-3 bg-slate-950 rounded border border-slate-800 flex justify-between items-center group">
+                    <div className="p-6 rounded-2xl bg-slate-900/30 border border-slate-800/60 backdrop-blur-xl">
+                        <h3 className="font-black text-[10px] uppercase tracking-widest text-slate-500 mb-4 px-1 flex justify-between items-center">
+                            Job Queue ({processes.length})
+                            <button onClick={randomizeProcesses} className="text-emerald-500 hover:text-emerald-400 flex items-center gap-1 transition-all"><Wand2 size={10} /> Randomize</button>
+                        </h3>
+                        <div className="space-y-2 max-h-[200px] overflow-y-auto pr-2 custom-scrollbar">
+                            {processes.map((p, idx) => (
+                                <div key={p.id} className="p-3 bg-slate-950/50 rounded-xl border border-white/5 flex justify-between items-center group">
                                     <div className="flex items-center gap-3">
-                                        <div className={`w-2 h-2 rounded-full`} style={{ backgroundColor: ['#60a5fa', '#a78bfa', '#f472b6', '#34d399'][p.id % 4] }} />
-                                        <div className="text-xs">
-                                            <div className="font-mono text-slate-300">ID: {p.id}</div>
-                                            <div className="text-slate-500">AT: {p.arrival_time} | BT: {p.burst_time} {algorithm === 'priority' ? `| P: ${p.priority}` : ''}</div>
+                                        <div className={`w-1.5 h-1.5 rounded-full`} style={{ backgroundColor: ['#60a5fa', '#fbbf24', '#f97316', '#34d399'][p.id % 4] }} />
+                                        <div className="text-[10px] font-black uppercase tracking-widest flex items-center gap-2">
+                                            <div className="text-slate-300">P{p.id}</div>
+                                            <div className="flex items-center gap-1.5 text-slate-500">
+                                                <span>A:</span>
+                                                <input
+                                                    type="number"
+                                                    className="bg-transparent text-slate-300 w-8 outline-none border-b border-white/5 focus:border-emerald-500/50"
+                                                    value={p.arrival_time}
+                                                    onChange={(e) => {
+                                                        const newProcs = [...processes];
+                                                        newProcs[idx] = { ...p, arrival_time: Number(e.target.value) };
+                                                        setProcesses(newProcs);
+                                                    }}
+                                                />
+                                                <span>B:</span>
+                                                <input
+                                                    type="number"
+                                                    className="bg-transparent text-slate-300 w-8 outline-none border-b border-white/5 focus:border-emerald-500/50"
+                                                    value={p.burst_time}
+                                                    onChange={(e) => {
+                                                        const newProcs = [...processes];
+                                                        newProcs[idx] = { ...p, burst_time: Number(e.target.value) };
+                                                        setProcesses(newProcs);
+                                                    }}
+                                                />
+                                                {algorithm === 'priority' && (
+                                                    <>
+                                                        <span>P:</span>
+                                                        <input
+                                                            type="number"
+                                                            className="bg-transparent text-slate-300 w-8 outline-none border-b border-white/5 focus:border-emerald-500/50"
+                                                            value={p.priority}
+                                                            onChange={(e) => {
+                                                                const newProcs = [...processes];
+                                                                newProcs[idx] = { ...p, priority: Number(e.target.value) };
+                                                                setProcesses(newProcs);
+                                                            }}
+                                                        />
+                                                    </>
+                                                )}
+                                            </div>
                                         </div>
                                     </div>
-                                    <button onClick={() => handleRemoveProcess(p.id)} className="text-slate-600 hover:text-red-400 opacity-0 group-hover:opacity-100 transition-opacity">
-                                        <Trash2 size={14} />
+                                    <button onClick={() => handleRemoveProcess(p.id)} className="text-red-500/50 hover:text-red-500 transition-opacity">
+                                        <Trash2 size={12} />
                                     </button>
                                 </div>
                             ))}
@@ -272,44 +328,43 @@ export default function CPUPage() {
                     <button
                         onClick={runSimulation}
                         disabled={currentModule.isLoading || processes.length === 0}
-                        className={`w-full py-4 rounded-xl font-bold flex items-center justify-center gap-2 transition-all shadow-lg ${currentModule.isLoading ? 'bg-slate-800 text-slate-500 cursor-not-allowed' : 'bg-blue-600 hover:bg-blue-500 text-white shadow-blue-500/20'
-                            }`}
+                        className={`w-full py-4 rounded-xl font-black text-[10px] uppercase tracking-widest flex items-center justify-center gap-2 transition-all shadow-xl ${currentModule.isLoading ? 'bg-slate-800 text-slate-500 cursor-not-allowed' : 'bg-emerald-600 hover:bg-emerald-500 text-white shadow-emerald-600/20'}`}
                     >
-                        {currentModule.isLoading ? 'Loading WASM...' : <><Play size={18} /> Run Simulation</>}
+                        {currentModule.isLoading ? 'Loading Kernel...' : <><Play size={16} /> Execute Routine</>}
                     </button>
                 </div>
 
                 {/* Visualizer */}
                 <div className="lg:col-span-2 space-y-6">
-                    <div className="p-8 rounded-3xl bg-slate-900/50 border border-slate-800 min-h-[400px]">
-                        <h3 className="text-xl font-bold mb-8">Gantt Chart Visualization</h3>
+                    <div className="p-8 rounded-3xl bg-slate-900/20 border border-slate-800/60 min-h-[400px] backdrop-blur-sm relative overflow-hidden">
+                        <h3 className="text-xl font-black mb-10 uppercase tracking-tight">Execution Visualization</h3>
 
                         {simulationResults.length > 0 ? (
                             <>
                                 <GanttChart data={simulationResults} />
 
                                 <div className="mt-12 overflow-x-auto">
-                                    <h4 className="text-sm font-bold text-slate-500 mb-4 uppercase tracking-wider">Process Details</h4>
-                                    <table className="w-full text-sm text-left text-slate-400">
-                                        <thead className="text-xs uppercase bg-slate-950 text-slate-500">
+                                    <h4 className="text-[10px] font-black text-slate-500 mb-6 uppercase tracking-widest px-1">Register Table</h4>
+                                    <table className="w-full text-xs text-left">
+                                        <thead className="bg-slate-950/50 text-[10px] uppercase font-black tracking-widest text-slate-500">
                                             <tr>
-                                                <th className="px-4 py-3 rounded-l-lg">Process</th>
-                                                <th className="px-4 py-3">Arrival</th>
-                                                <th className="px-4 py-3">Burst</th>
-                                                <th className="px-4 py-3">Completion</th>
-                                                <th className="px-4 py-3">Turnaround</th>
-                                                <th className="px-4 py-3 rounded-r-lg">Waiting</th>
+                                                <th className="px-4 py-3 rounded-l-xl">PID</th>
+                                                <th className="px-4 py-3">AT</th>
+                                                <th className="px-4 py-3">BT</th>
+                                                <th className="px-4 py-3">CT</th>
+                                                <th className="px-4 py-3 text-amber-400">TAT</th>
+                                                <th className="px-4 py-3 rounded-r-xl text-emerald-400">WT</th>
                                             </tr>
                                         </thead>
-                                        <tbody>
+                                        <tbody className="divide-y divide-white/5 font-bold">
                                             {rawResults.sort((a, b) => (a.completion_time || 0) - (b.completion_time || 0)).map((p) => (
-                                                <tr key={p.id} className="border-b border-slate-800 hover:bg-slate-800/20">
-                                                    <td className="px-4 py-3 font-medium text-slate-200">P{p.id}</td>
-                                                    <td className="px-4 py-3">{p.arrival_time}</td>
-                                                    <td className="px-4 py-3">{p.burst_time}</td>
+                                                <tr key={p.id} className="hover:bg-white/5 transition-colors">
+                                                    <td className="px-4 py-3 text-slate-200">P{p.id}</td>
+                                                    <td className="px-4 py-3 text-slate-500">{p.arrival_time}</td>
+                                                    <td className="px-4 py-3 text-slate-500">{p.burst_time}</td>
                                                     <td className="px-4 py-3 text-emerald-400">{p.completion_time}</td>
-                                                    <td className="px-4 py-3 text-purple-400">{p.turn_around_time}</td>
-                                                    <td className="px-4 py-3 text-blue-400">{p.waiting_time}</td>
+                                                    <td className="px-4 py-3 text-amber-400">{p.turn_around_time}</td>
+                                                    <td className="px-4 py-3 text-emerald-400">{p.waiting_time}</td>
                                                 </tr>
                                             ))}
                                         </tbody>
@@ -317,25 +372,25 @@ export default function CPUPage() {
                                 </div>
                             </>
                         ) : (
-                            <div className="h-64 flex items-center justify-center text-slate-600 border-2 border-dashed border-slate-800 rounded-xl">
-                                Run simulation to view results
+                            <div className="flex-1 flex flex-col items-center justify-center text-slate-800 border-2 border-dashed border-slate-800/40 rounded-2xl">
+                                <span className="font-black uppercase tracking-widest text-[10px] opacity-20">Idle</span>
                             </div>
                         )}
 
                         <div className="mt-12">
-                            <h4 className="text-sm font-bold text-slate-500 mb-4 uppercase tracking-wider">Metrics</h4>
+                            <h4 className="text-[10px] font-black text-slate-500 mb-6 uppercase tracking-widest px-1">Kernel Metrics</h4>
                             <div className="grid grid-cols-3 gap-4">
-                                <div className="p-4 bg-slate-950 rounded-xl border border-slate-800">
-                                    <div className="text-2xl font-bold text-blue-400">{stats.avgWait.toFixed(2)}ms</div>
-                                    <div className="text-[10px] text-slate-500 uppercase">Avg Wait Time</div>
+                                <div className="p-6 bg-slate-950/40 rounded-2xl border border-white/5 flex flex-col items-center">
+                                    <div className="text-2xl font-black text-emerald-400">{stats.avgWait.toFixed(1)}</div>
+                                    <div className="text-[9px] text-slate-500 uppercase font-black tracking-widest mt-1">Wait</div>
                                 </div>
-                                <div className="p-4 bg-slate-950 rounded-xl border border-slate-800">
-                                    <div className="text-2xl font-bold text-purple-400">{stats.avgTurnaround.toFixed(2)}ms</div>
-                                    <div className="text-[10px] text-slate-500 uppercase">Avg Turnaround</div>
+                                <div className="p-6 bg-slate-950/40 rounded-2xl border border-white/5 flex flex-col items-center">
+                                    <div className="text-2xl font-black text-amber-400">{stats.avgTurnaround.toFixed(1)}</div>
+                                    <div className="text-[9px] text-slate-500 uppercase font-black tracking-widest mt-1">TAT</div>
                                 </div>
-                                <div className="p-4 bg-slate-950 rounded-xl border border-slate-800">
-                                    <div className="text-2xl font-bold text-emerald-400">{stats.utilization.toFixed(1)}%</div>
-                                    <div className="text-[10px] text-slate-500 uppercase">CPU Utilization</div>
+                                <div className="p-6 bg-slate-950/40 rounded-2xl border border-white/5 flex flex-col items-center">
+                                    <div className="text-2xl font-black text-emerald-400">{stats.utilization.toFixed(1)}%</div>
+                                    <div className="text-[9px] text-slate-500 uppercase font-black tracking-widest mt-1">Util</div>
                                 </div>
                             </div>
                         </div>

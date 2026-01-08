@@ -18,9 +18,9 @@ export default function MemoryMap({ blocks }: { blocks: MemoryBlock[] }) {
                     <div
                         key={block.id}
                         style={{ width: `${block.size}%` }}
-                        className={`h-full relative group flex items-center justify-center text-[10px] font-mono border-r border-slate-900 last:border-0 ${block.type === 'process' ? 'bg-purple-600/40 text-purple-200' :
-                                block.type === 'system' ? 'bg-slate-700 text-slate-400' :
-                                    'bg-slate-900'
+                        className={`h-full relative group flex items-center justify-center text-[10px] font-mono border-r border-slate-900 last:border-0 ${block.type === 'process' ? 'bg-amber-600/40 text-amber-200' :
+                            block.type === 'system' ? 'bg-slate-700 text-slate-400' :
+                                'bg-slate-900'
                             }`}
                     >
                         <span className="truncate px-1 uppercase">{block.label}</span>
@@ -32,7 +32,7 @@ export default function MemoryMap({ blocks }: { blocks: MemoryBlock[] }) {
             </div>
             <div className="flex gap-4 mt-4">
                 <div className="flex items-center gap-2">
-                    <div className="w-3 h-3 bg-purple-600/40 rounded" />
+                    <div className="w-3 h-3 bg-amber-600/40 rounded" />
                     <span className="text-[10px] text-slate-500 uppercase">Process</span>
                 </div>
                 <div className="flex items-center gap-2">
